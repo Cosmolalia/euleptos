@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harness Admin</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --surface: #1e2746;
+            --surface-hover: #263055;
+            --text: #e0e0e0;
+            --text-muted: #8892b0;
+            --text-dim: #5a6785;
+            --accent: #64ffda;
+            --accent-dim: #3d997f;
+            --border: #2d3555;
+            --error: #ff6b6b;
+            --warning: #ffd93d;
+            --success: #4ade80;
+            --info: #60a5fa;
+            --scrollbar: #2d3555;
+            --scrollbar-hover: #3d4565;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+        /* ── Login ── */
+        .login-overlay {
+            position: fixed; inset: 0;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .login-overlay.hidden { display: none; }
+        .login-box {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 12px; padding: 40px; width: 360px; text-align: center;
+        }
+        .login-box h1 { color: var(--accent); font-size: 22px; margin-bottom: 6px; }
+        .login-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+        .login-box input {
+            width: 100%; padding: 10px 14px; margin-bottom: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text); font-size: 14px;
+        }
+        .login-box input:focus { outline: none; border-color: var(--accent); }
+        .login-box .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .login-box .btn-primary { background: var(--accent); color: #1a1a2e; }
+        .login-box .btn-primary:hover { opacity: 0.9; }
+        .login-box .error-msg { color: var(--error); font-size: 13px; margin-bottom: 12px; display: none; }
+        .login-box .back-link { color: var(--accent); font-size: 13px; margin-top: 16px; display: inline-block; text-decoration: none; }
+
+        /* ── Nav Sidebar ── */
+        .nav-sidebar {
+            width: 220px; flex-shrink: 0;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 16px 0;
+        }
+        .nav-header {
+            padding: 0 16px 16px; border-bottom: 1px solid var(--border);
+            margin-bottom: 8px;
+        }
+        .nav-header h2 { font-size: 16px; color: var(--accent); }
+        .nav-header .user-info { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .nav-item {
+            padding: 10px 16px; cursor: pointer; font-size: 14px;
+            color: var(--text-muted); display: flex; align-items: center; gap: 10px;
+            transition: all 0.15s;
+        }
+        .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+        .nav-item.active { background: var(--bg-tertiary); color: var(--accent); border-left: 3px solid var(--accent); }
+        .nav-item .icon { width: 18px; text-align: center; font-size: 15px; }
+        .nav-item .badge {
+            margin-left: auto; background: var(--accent); color: #1a1a2e;
+            font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+        }
+        .nav-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--border); }
+        .nav-bottom a { color: var(--text-dim); font-size: 12px; text-decoration: none; }
+        .nav-bottom a:hover { color: var(--accent); }
+
+        /* ── Main Content ── */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column;
+            overflow: hidden; min-width: 0;
+        }
+        .page-header {
+            padding: 20px 28px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+        }
+        .page-header h1 { font-size: 20px; font-weight: 600; }
+        .page-header .subtitle { color: var(--text-muted); font-size: 13px; }
+        .page-header .actions { margin-left: auto; display: flex; gap: 8px; }
+        .page-body { flex: 1; overflow-y: auto; padding: 20px 28px; }
+
+        .section { display: none; }
+        .section.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+        /* ── Cards / Tables ── */
+        .stat-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 20px;
+        }
+        .stat-card .label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+        .stat-card .detail { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left; padding: 10px 14px; font-size: 12px;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border); position: sticky; top: 0;
+            background: var(--bg);
+        }
+        td {
+            padding: 10px 14px; font-size: 13px; border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tr:hover td { background: var(--surface); }
+
+        .tier-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 4px;
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+        }
+        .tier-admin { background: #4f46e520; color: #a78bfa; border: 1px solid #4f46e540; }
+        .tier-trusted { background: #22c55e20; color: #4ade80; border: 1px solid #22c55e40; }
+        .tier-standard { background: #3b82f620; color: #60a5fa; border: 1px solid #3b82f640; }
+        .tier-readonly { background: #f59e0b20; color: #fbbf24; border: 1px solid #f59e0b40; }
+
+        .status-dot {
+            display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+        }
+        .status-online { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .status-offline { background: var(--text-dim); }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 7px 14px; border: none; border-radius: 6px;
+            cursor: pointer; font-size: 13px; font-weight: 500;
+            transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
+        .btn-primary { background: var(--accent); color: #1a1a2e; }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-danger:hover { opacity: 0.85; }
+        .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--surface-hover); }
+        .btn-warning { background: var(--warning); color: #1a1a2e; }
+        .btn-ghost { background: transparent; color: var(--text-muted); }
+        .btn-ghost:hover { color: var(--text); background: var(--surface); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Forms / Inputs ── */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input {
+            width: 100%; padding: 8px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text); font-size: 14px;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+        select.form-input { cursor: pointer; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 12px; padding: 28px; width: 440px; max-width: 90vw;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal h3 { font-size: 18px; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+
+        /* ── Activity Log ── */
+        .log-container {
+            flex: 1; overflow-y: auto; font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px; line-height: 1.8; padding: 12px;
+            background: var(--surface); border-radius: 8px; border: 1px solid var(--border);
+        }
+        .log-entry { padding: 2px 8px; border-radius: 3px; }
+        .log-entry:hover { background: var(--surface-hover); }
+        .log-ts { color: var(--text-dim); }
+        .log-action { color: var(--accent); font-weight: 600; }
+        .log-user { color: var(--info); }
+        .log-detail { color: var(--text-muted); }
+        .log-filter-bar {
+            display: flex; gap: 8px; margin-bottom: 12px; flex-shrink: 0;
+            flex-wrap: wrap; align-items: center;
+        }
+        .log-filter-bar input, .log-filter-bar select {
+            padding: 6px 10px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text); font-size: 13px;
+        }
+
+        /* ── Process Registry ── */
+        .process-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .process-card .pid { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--accent); min-width: 70px; }
+        .process-card .info { flex: 1; }
+        .process-card .desc { font-size: 14px; }
+        .process-card .meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .process-card .locked { color: var(--warning); font-weight: 600; font-size: 12px; }
+
+        /* ── Agent ── */
+        .schedule-item {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .schedule-item .name { font-weight: 600; min-width: 100px; }
+        .schedule-item .cron { font-family: monospace; color: var(--accent); }
+        .schedule-item .last-run { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+        /* ── Tools ── */
+        .tool-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 16px; margin-bottom: 10px;
+        }
+        .tool-card .tool-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .tool-card .tool-name { font-weight: 600; font-size: 15px; }
+        .tool-card .tool-status { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+        .tool-card .tool-actions-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tool-card .tool-action-tag {
+            font-size: 11px; padding: 2px 8px; background: var(--bg-tertiary);
+            border-radius: 4px; color: var(--text-muted);
+        }
+
+        /* ── Server Status ── */
+        .server-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .server-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 20px;
+        }
+        .server-card h3 { font-size: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .server-card .detail-row {
+            display: flex; justify-content: space-between; padding: 6px 0;
+            font-size: 13px; border-bottom: 1px solid var(--border);
+        }
+        .server-card .detail-row:last-child { border-bottom: none; }
+        .server-card .detail-key { color: var(--text-muted); }
+        .server-card .detail-val { color: var(--text); font-family: monospace; font-size: 12px; }
+
+        /* ── Toast ── */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            padding: 12px 20px; border-radius: 8px; font-size: 13px;
+            animation: slideIn 0.3s ease; min-width: 250px;
+            border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .toast-success { background: #065f46; color: #d1fae5; border-color: #10b981; }
+        .toast-error { background: #7f1d1d; color: #fecaca; border-color: #ef4444; }
+        .toast-info { background: #1e3a5f; color: #bfdbfe; border-color: #3b82f6; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .nav-sidebar { width: 60px; }
+            .nav-item span:not(.icon) { display: none; }
+            .nav-header h2, .nav-header .user-info, .nav-bottom { display: none; }
+            .nav-item .badge { display: none; }
+            .page-body { padding: 12px; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ── Invite Section ── */
+        .invite-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .invite-code {
+            font-family: monospace; font-size: 16px; font-weight: 700;
+            color: var(--accent); min-width: 120px; letter-spacing: 1px;
+        }
+        .invite-meta { flex: 1; font-size: 12px; color: var(--text-muted); }
+        .invite-active { color: var(--success); }
+        .invite-revoked { color: var(--error); text-decoration: line-through; }
+
+        /* ── Tabs ── */
+        .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; flex-shrink: 0; }
+        .tab {
+            padding: 8px 16px; cursor: pointer; font-size: 13px; color: var(--text-muted);
+            border-bottom: 2px solid transparent; transition: all 0.15s;
+        }
+        .tab:hover { color: var(--text); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .empty-state { text-align: center; padding: 40px; color: var(--text-dim); font-size: 14px; }
+
+        /* ── Session list specific ── */
+        .session-row { cursor: pointer; }
+        .session-row:hover td { background: var(--surface-hover); }
+        .session-name { font-weight: 500; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .session-archived { opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+        <h1>Admin Panel</h1>
+        <p>Harness administration &mdash; admin accounts only</p>
+        <div id="loginError" class="error-msg"></div>
+        <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+        <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+        <button class="btn btn-primary" onclick="doLogin()" style="width:100%;margin-top:4px;">Login</button>
+        <a href="/static/index.html" class="back-link">Back to Harness</a>
+    </div>
+</div>
+
+<!-- Nav Sidebar -->
+<nav class="nav-sidebar" id="navSidebar">
+    <div class="nav-header">
+        <h2>Admin</h2>
+        <div class="user-info" id="navUser">-</div>
+    </div>
+    <div class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
+        <span class="icon">&#9632;</span><span>Dashboard</span>
+    </div>
+    <div class="nav-item" data-section="users" onclick="showSection('users')">
+        <span class="icon">&#9679;</span><span>Users</span>
+        <span class="badge" id="userCount">0</span>
+    </div>
+    <div class="nav-item" data-section="sessions" onclick="showSection('sessions')">
+        <span class="icon">&#9993;</span><span>Sessions</span>
+        <span class="badge" id="sessionCount">0</span>
+    </div>
+    <div class="nav-item" data-section="activity" onclick="showSection('activity')">
+        <span class="icon">&#9776;</span><span>Activity</span>
+    </div>
+    <div class="nav-item" data-section="processes" onclick="showSection('processes')">
+        <span class="icon">&#9881;</span><span>Processes</span>
+    </div>
+    <div class="nav-item" data-section="agent" onclick="showSection('agent')">
+        <span class="icon">&#9889;</span><span>Agent</span>
+    </div>
+    <div class="nav-item" data-section="tools" onclick="showSection('tools')">
+        <span class="icon">&#9874;</span><span>Tools</span>
+    </div>
+    <div class="nav-item" data-section="invites" onclick="showSection('invites')">
+        <span class="icon">&#9993;</span><span>Invites</span>
+    </div>
+    <div class="nav-item" data-section="server" onclick="showSection('server')">
+        <span class="icon">&#9741;</span><span>Server</span>
+    </div>
+    <div class="nav-bottom">
+        <a href="/static/index.html">Back to Harness</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="section active" id="sec-dashboard">
+        <div class="page-header">
+            <div><h1>Dashboard</h1><div class="subtitle">System overview</div></div>
+            <div class="actions"><button class="btn btn-secondary" onclick="refreshDashboard()">Refresh</button></div>
+        </div>
+        <div class="page-body">
+            <div class="stat-grid" id="dashStats"></div>
+            <h3 style="margin-bottom:12px;font-size:14px;color:var(--text-muted);">Recent Activity</h3>
+            <div id="dashRecentActivity" style="font-family:monospace;font-size:12px;line-height:1.8;max-height:300px;overflow-y:auto;background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"></div>
+        </div>
+    </div>
+
+    <!-- ═══ USERS ═══ -->
+    <div class="section" id="sec-users">
+        <div class="page-header">
+            <div><h1>Users</h1><div class="subtitle">Manage accounts &amp; permissions</div></div>
+            <div class="actions"><button class="btn btn-primary" onclick="openModal('createUser')">+ New User</button></div>
+        </div>
+        <div class="page-body">
+            <table>
+                <thead><tr>
+                    <th>Status</th><th>Username</th><th>Display Name</th>
+                    <th>Tier</th><th>Created</th><th>Tokens</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="usersTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══ SESSIONS ═══ -->
+    <div class="section" id="sec-sessions">
+        <div class="page-header">
+            <div><h1>Sessions</h1><div class="subtitle">All chat sessions across users</div></div>
+            <div class="actions">
+                <input type="text" class="form-input" id="sessionSearch" placeholder="Search sessions..." style="width:220px;" oninput="filterSessions()">
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);cursor:pointer;">
+                    <input type="checkbox" id="showArchived" onchange="loadSessions()"> Archived
+                </label>
+            </div>
+        </div>
+        <div class="page-body">
+            <table>
+                <thead><tr>
+                    <th>Name</th><th>Messages</th><th>Model</th>
+                    <th>Created</th><th>Last Updated</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="sessionsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══ ACTIVITY ═══ -->
+    <div class="section" id="sec-activity">
+        <div class="page-header">
+            <div><h1>Activity Log</h1><div class="subtitle">All user actions</div></div>
+            <div class="actions"><button class="btn btn-secondary" onclick="loadActivity()">Refresh</button></div>
+        </div>
+        <div class="page-body" style="display:flex;flex-direction:column;">
+            <div class="log-filter-bar">
+                <input type="text" id="activityFilter" placeholder="Filter..." oninput="filterActivity()">
+                <select id="activityActionFilter" onchange="filterActivity()">
+                    <option value="">All Actions</option>
+                    <option value="login">Login</option>
+                    <option value="message_sent">Messages</option>
+                    <option value="session_join">Session Join</option>
+                    <option value="user_created">User Created</option>
+                    <option value="password_reset">Password Reset</option>
+                    <option value="tier_changed">Tier Changed</option>
+                </select>
+                <select id="activityUserFilter" onchange="filterActivity()">
+                    <option value="">All Users</option>
+                </select>
+            </div>
+            <div class="log-container" id="activityLog"></div>
+        </div>
+    </div>
+
+    <!-- ═══ PROCESSES ═══ -->
+    <div class="section" id="sec-processes">
+        <div class="page-header">
+            <div><h1>Process Registry</h1><div class="subtitle">Protected background processes</div></div>
+            <div class="actions"><button class="btn btn-secondary" onclick="loadProcesses()">Refresh</button></div>
+        </div>
+        <div class="page-body">
+            <div id="processCards"></div>
+        </div>
+    </div>
+
+    <!-- ═══ AGENT ═══ -->
+    <div class="section" id="sec-agent">
+        <div class="page-header">
+            <div><h1>Agent</h1><div class="subtitle">Autonomous agent scheduler &amp; logs</div></div>
+            <div class="actions">
+                <button class="btn btn-primary" id="agentToggleBtn" onclick="toggleAgent()">Enable</button>
+                <button class="btn btn-warning" onclick="triggerAgent()">Trigger Now</button>
+                <button class="btn btn-secondary" onclick="loadAgent()">Refresh</button>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="tab-bar">
+                <div class="tab active" onclick="showAgentTab('config')">Config</div>
+                <div class="tab" onclick="showAgentTab('schedules')">Schedules</div>
+                <div class="tab" onclick="showAgentTab('log')">Log</div>
+                <div class="tab" onclick="showAgentTab('instructions')">Instructions</div>
+                <div class="tab" onclick="showAgentTab('reports')">Reports</div>
+            </div>
+            <div id="agentContent"></div>
+        </div>
+    </div>
+
+    <!-- ═══ TOOLS ═══ -->
+    <div class="section" id="sec-tools">
+        <div class="page-header">
+            <div><h1>Tools</h1><div class="subtitle">Agent tool plugins &amp; configuration</div></div>
+            <div class="actions"><button class="btn btn-secondary" onclick="loadTools()">Refresh</button></div>
+        </div>
+        <div class="page-body">
+            <div class="tab-bar">
+                <div class="tab active" onclick="showToolsTab('registry')">Registry</div>
+                <div class="tab" onclick="showToolsTab('config')">Config</div>
+                <div class="tab" onclick="showToolsTab('execlog')">Execution Log</div>
+            </div>
+            <div id="toolsContent"></div>
+        </div>
+    </div>
+
+    <!-- ═══ INVITES ═══ -->
+    <div class="section" id="sec-invites">
+        <div class="page-header">
+            <div><h1>Invites</h1><div class="subtitle">Registration invite codes</div></div>
+            <div class="actions"><button class="btn btn-primary" onclick="openModal('createInvite')">+ New Invite</button></div>
+        </div>
+        <div class="page-body">
+            <div id="invitesList"></div>
+        </div>
+    </div>
+
+    <!-- ═══ SERVER ═══ -->
+    <div class="section" id="sec-server">
+        <div class="page-header">
+            <div><h1>Server Status</h1><div class="subtitle">Infrastructure health</div></div>
+            <div class="actions"><button class="btn btn-secondary" onclick="loadServer()">Refresh</button></div>
+        </div>
+        <div class="page-body">
+            <div class="server-grid" id="serverGrid"></div>
+        </div>
+    </div>
+
+</div><!-- /main-content -->
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let currentAdmin = null;
+let allUsers = [];
+let allSessions = [];
+let allActivity = [];
+let currentAgentTab = 'config';
+let currentToolsTab = 'registry';
+
+// ═══════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════
+function toast(msg, type='info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+async function api(path, opts={}) {
+    try {
+        const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', ...opts.headers } });
+        if (res.status === 401 || res.status === 403) { toast('Unauthorized', 'error'); return null; }
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ detail: res.statusText }));
+            toast(err.detail || 'Request failed', 'error');
+            return null;
+        }
+        const text = await res.text();
+        return text ? JSON.parse(text) : {};
+    } catch(e) { toast('Network error: ' + e.message, 'error'); return null; }
+}
+
+function fmtDate(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtDateShort(iso) {
+    if (!iso) return '-';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function timeAgo(iso) {
+    if (!iso) return '-';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+}
+
+// ═══════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════
+async function checkAuth() {
+    const data = await api('/api/auth/me');
+    if (!data) return false;
+    if (data.permission_tier !== 'admin') {
+        document.getElementById('loginError').textContent = 'Admin access required';
+        document.getElementById('loginError').style.display = 'block';
+        return false;
+    }
+    currentAdmin = data;
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('navUser').textContent = data.display_name + ' (admin)';
+    return true;
+}
+
+async function doLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if (!user || !pass) return;
+    const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, password: pass })
+    });
+    if (res.ok) {
+        if (await checkAuth()) { loadAll(); }
+        else { document.getElementById('loginError').textContent = 'Admin access required'; document.getElementById('loginError').style.display = 'block'; }
+    } else {
+        const err = await res.json().catch(() => ({}));
+        document.getElementById('loginError').textContent = err.detail || 'Login failed';
+        document.getElementById('loginError').style.display = 'block';
+    }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + name)?.classList.add('active');
+    document.querySelector(`.nav-item[data-section="${name}"]`)?.classList.add('active');
+    // Lazy load
+    if (name === 'users') loadUsers();
+    if (name === 'sessions') loadSessions();
+    if (name === 'activity') loadActivity();
+    if (name === 'processes') loadProcesses();
+    if (name === 'agent') loadAgent();
+    if (name === 'tools') loadTools();
+    if (name === 'invites') loadInvites();
+    if (name === 'server') loadServer();
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(type, data={}) {
+    const mc = document.getElementById('modalContent');
+    if (type === 'createUser') {
+        mc.innerHTML = `
+            <h3>Create User</h3>
+            <div class="form-group"><label>Username</label><input class="form-input" id="newUsername" placeholder="lowercase"></div>
+            <div class="form-group"><label>Display Name</label><input class="form-input" id="newDisplayName" placeholder="Shown in UI"></div>
+            <div class="form-group"><label>Password</label><input class="form-input" id="newPassword" type="password"></div>
+            <div class="form-group"><label>Tier</label>
+                <select class="form-input" id="newTier">
+                    <option value="standard">Standard</option>
+                    <option value="trusted">Trusted</option>
+                    <option value="admin">Admin</option>
+                    <option value="readonly">Read-only</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createUser()">Create</button>
+            </div>`;
+    } else if (type === 'resetPassword') {
+        mc.innerHTML = `
+            <h3>Reset Password &mdash; ${escHtml(data.username)}</h3>
+            <div class="form-group"><label>New Password</label><input class="form-input" id="resetPw" type="password"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="resetPassword('${data.username}')">Reset</button>
+            </div>`;
+    } else if (type === 'changeTier') {
+        mc.innerHTML = `
+            <h3>Change Tier &mdash; ${escHtml(data.username)}</h3>
+            <div class="form-group"><label>Permission Tier</label>
+                <select class="form-input" id="changeTierVal">
+                    <option value="admin" ${data.tier==='admin'?'selected':''}>Admin</option>
+                    <option value="trusted" ${data.tier==='trusted'?'selected':''}>Trusted</option>
+                    <option value="standard" ${data.tier==='standard'?'selected':''}>Standard</option>
+                    <option value="readonly" ${data.tier==='readonly'?'selected':''}>Read-only</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="changeTier('${data.username}')">Save</button>
+            </div>`;
+    } else if (type === 'createInvite') {
+        mc.innerHTML = `
+            <h3>Create Invite</h3>
+            <div class="form-group"><label>Max Uses (0 = unlimited)</label><input class="form-input" id="inviteMaxUses" type="number" value="1" min="0"></div>
+            <div class="form-group"><label>Note (optional)</label><input class="form-input" id="inviteNote" placeholder="Who is this for?"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createInvite()">Create</button>
+            </div>`;
+    } else if (type === 'sessionDetail') {
+        mc.innerHTML = `
+            <h3>${escHtml(data.name || 'Unnamed Session')}</h3>
+            <div style="font-size:13px;line-height:1.8;">
+                <div><span style="color:var(--text-muted)">ID:</span> <code style="font-size:11px">${data.id}</code></div>
+                <div><span style="color:var(--text-muted)">Messages:</span> ${data.message_count || 0}</div>
+                <div><span style="color:var(--text-muted)">Model:</span> ${data.model || 'default (opus)'}</div>
+                <div><span style="color:var(--text-muted)">Created:</span> ${fmtDate(data.created)}</div>
+                <div><span style="color:var(--text-muted)">Updated:</span> ${fmtDate(data.last_updated)}</div>
+                <div><span style="color:var(--text-muted)">Archived:</span> ${data.archived ? 'Yes' : 'No'}</div>
+                <div><span style="color:var(--text-muted)">Thinking:</span> ${data.show_thinking ? 'On' : 'Off'}</div>
+                <div><span style="color:var(--text-muted)">Max Context:</span> ${(data.max_context_tokens||150000).toLocaleString()} tokens</div>
+                ${data.base_prompt ? `<div style="margin-top:12px;"><span style="color:var(--text-muted)">Base Prompt:</span><div style="margin-top:4px;padding:8px;background:var(--surface);border-radius:6px;font-size:12px;max-height:200px;overflow-y:auto;white-space:pre-wrap;">${escHtml(data.base_prompt.substring(0, 500))}${data.base_prompt.length>500?'...':''}</div></div>` : ''}
+                ${data.session_notes ? `<div style="margin-top:12px;"><span style="color:var(--text-muted)">Notes:</span><div style="margin-top:4px;padding:8px;background:var(--surface);border-radius:6px;font-size:12px;max-height:150px;overflow-y:auto;white-space:pre-wrap;">${escHtml(data.session_notes.substring(0, 300))}${data.session_notes.length>300?'...':''}</div></div>` : ''}
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                ${!data.archived ? `<button class="btn btn-danger btn-sm" onclick="archiveSession('${data.id}')">Archive</button>` : ''}
+            </div>`;
+    }
+    document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════
+async function refreshDashboard() {
+    const [users, sessions, presence, agentStatus, processes] = await Promise.all([
+        api('/api/admin/users'),
+        api('/api/sessions'),
+        api('/api/presence').catch(() => null),
+        api('/api/agent/status').catch(() => null),
+        api('/api/processes').catch(() => null),
+    ]);
+
+    const userCount = users ? Object.keys(users).length : 0;
+    const sessionCount = sessions ? sessions.length : 0;
+    const onlineCount = presence ? Object.keys(presence).length : 0;
+    const activeSessionCount = sessions ? sessions.filter(s => !s.archived).length : 0;
+    const processCount = processes ? processes.length : 0;
+    const agentEnabled = agentStatus?.enabled || false;
+
+    document.getElementById('userCount').textContent = userCount;
+    document.getElementById('sessionCount').textContent = sessionCount;
+
+    document.getElementById('dashStats').innerHTML = `
+        <div class="stat-card"><div class="label">Users</div><div class="value">${userCount}</div><div class="detail">${onlineCount} online now</div></div>
+        <div class="stat-card"><div class="label">Sessions</div><div class="value">${activeSessionCount}</div><div class="detail">${sessionCount} total (${sessionCount - activeSessionCount} archived)</div></div>
+        <div class="stat-card"><div class="label">Agent</div><div class="value" style="color:${agentEnabled ? 'var(--success)' : 'var(--text-dim)'}">${agentEnabled ? 'Active' : 'Idle'}</div><div class="detail">${agentStatus?.next_run ? 'Next: ' + fmtDate(agentStatus.next_run) : 'No schedule'}</div></div>
+        <div class="stat-card"><div class="label">Protected Processes</div><div class="value">${processCount}</div><div class="detail">${processes ? processes.filter(p=>p.locked).length : 0} locked</div></div>
+    `;
+
+    // Recent activity
+    const activity = await api('/api/activity-log?limit=30');
+    if (activity && activity.length) {
+        document.getElementById('dashRecentActivity').innerHTML = activity.slice(0, 30).map(e =>
+            `<div class="log-entry"><span class="log-ts">${fmtDate(e.ts)}</span> <span class="log-action">${escHtml(e.action)}</span> <span class="log-user">${escHtml(e.user||'')}</span> <span class="log-detail">${escHtml(e.detail||e.session||'')}</span></div>`
+        ).join('');
+    } else {
+        document.getElementById('dashRecentActivity').innerHTML = '<div class="empty-state">No recent activity</div>';
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+//  USERS
+// ═══════════════════════════════════════════════════════
+async function loadUsers() {
+    const [users, presence] = await Promise.all([
+        api('/api/admin/users'),
+        api('/api/presence').catch(() => ({}))
+    ]);
+    if (!users) return;
+    allUsers = users;
+    const onlineUsers = new Set(Object.keys(presence || {}));
+    const tokenData = await api('/api/admin/relay-keys').catch(() => null);
+
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = Object.entries(users).map(([username, u]) => {
+        const online = onlineUsers.has(username);
+        const tier = u.permission_tier || 'standard';
+        const tokenCount = tokenData ? Object.values(tokenData).filter(v => v === username).length : '-';
+        return `<tr>
+            <td><span class="status-dot ${online ? 'status-online' : 'status-offline'}"></span>${online ? 'Online' : 'Offline'}</td>
+            <td><strong>${escHtml(username)}</strong></td>
+            <td>${escHtml(u.display_name || '-')}</td>
+            <td><span class="tier-badge tier-${tier}">${tier}</span></td>
+            <td>${fmtDateShort(u.created)}</td>
+            <td>${tokenCount}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="openModal('resetPassword',{username:'${username}'})">Reset PW</button>
+                <button class="btn btn-sm btn-secondary" onclick="openModal('changeTier',{username:'${username}',tier:'${tier}'})">Tier</button>
+                ${tier !== 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser('${username}')">Delete</button>` : ''}
+            </td>
+        </tr>`;
+    }).join('');
+
+    // Update activity filter
+    const sel = document.getElementById('activityUserFilter');
+    const existing = sel.value;
+    sel.innerHTML = '<option value="">All Users</option>' + Object.keys(users).map(u => `<option value="${u}">${u}</option>`).join('');
+    sel.value = existing;
+}
+
+async function createUser() {
+    const username = document.getElementById('newUsername').value.trim().toLowerCase();
+    const display_name = document.getElementById('newDisplayName').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const tier = document.getElementById('newTier').value;
+    if (!username || !password) { toast('Username and password required', 'error'); return; }
+    const res = await api('/api/admin/users', {
+        method: 'POST',
+        body: JSON.stringify({ username, display_name: display_name || username, password, permission_tier: tier })
+    });
+    if (res) { toast(`User "${username}" created`, 'success'); closeModal(); loadUsers(); }
+}
+
+async function resetPassword(username) {
+    const pw = document.getElementById('resetPw').value;
+    if (!pw) { toast('Password required', 'error'); return; }
+    const res = await api(`/api/admin/users/${username}/reset-password`, {
+        method: 'POST', body: JSON.stringify({ new_password: pw })
+    });
+    if (res) { toast(`Password reset for ${username}`, 'success'); closeModal(); }
+}
+
+async function changeTier(username) {
+    const tier = document.getElementById('changeTierVal').value;
+    const res = await api(`/api/admin/users/${username}/tier`, {
+        method: 'POST', body: JSON.stringify({ tier })
+    });
+    if (res) { toast(`${username} is now ${tier}`, 'success'); closeModal(); loadUsers(); }
+}
+
+async function deleteUser(username) {
+    if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+    const pw = prompt('Confirm your admin password:');
+    if (!pw) return;
+    const res = await api(`/api/admin/users/${username}`, {
+        method: 'DELETE', body: JSON.stringify({ admin_password: pw })
+    });
+    if (res) { toast(`User "${username}" deleted`, 'success'); loadUsers(); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SESSIONS
+// ═══════════════════════════════════════════════════════
+async function loadSessions() {
+    const sessions = await api('/api/sessions');
+    if (!sessions) return;
+    allSessions = sessions;
+    renderSessions();
+}
+
+function renderSessions() {
+    const search = (document.getElementById('sessionSearch')?.value || '').toLowerCase();
+    const showArchived = document.getElementById('showArchived')?.checked;
+    let filtered = allSessions;
+    if (!showArchived) filtered = filtered.filter(s => !s.archived);
+    if (search) filtered = filtered.filter(s => (s.name||'').toLowerCase().includes(search) || s.id.includes(search));
+    filtered.sort((a, b) => new Date(b.last_updated || b.created) - new Date(a.last_updated || a.created));
+
+    document.getElementById('sessionsTableBody').innerHTML = filtered.map(s =>
+        `<tr class="session-row ${s.archived ? 'session-archived' : ''}" onclick='openModal("sessionDetail",${JSON.stringify(s).replace(/'/g,"&#39;")})'>
+            <td class="session-name">${escHtml(s.name || 'Unnamed')}</td>
+            <td>${s.message_count || 0}</td>
+            <td>${s.model || 'opus'}</td>
+            <td>${fmtDateShort(s.created)}</td>
+            <td>${timeAgo(s.last_updated)}</td>
+            <td><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openSessionInHarness('${s.id}')">Open</button></td>
+        </tr>`
+    ).join('');
+}
+
+function filterSessions() { renderSessions(); }
+
+function openSessionInHarness(sid) {
+    window.open(`/static/index.html#session=${sid}`, '_blank');
+}
+
+async function archiveSession(sid) {
+    const res = await api(`/api/sessions/${sid}/delete`, { method: 'POST' });
+    if (res) { toast('Session archived', 'success'); closeModal(); loadSessions(); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  ACTIVITY LOG
+// ═══════════════════════════════════════════════════════
+async function loadActivity() {
+    const data = await api('/api/activity-log?limit=500');
+    if (!data) return;
+    allActivity = data;
+    renderActivity();
+}
+
+function renderActivity() {
+    const textFilter = (document.getElementById('activityFilter')?.value || '').toLowerCase();
+    const actionFilter = document.getElementById('activityActionFilter')?.value || '';
+    const userFilter = document.getElementById('activityUserFilter')?.value || '';
+
+    let filtered = allActivity;
+    if (textFilter) filtered = filtered.filter(e =>
+        (e.action||'').toLowerCase().includes(textFilter) ||
+        (e.user||'').toLowerCase().includes(textFilter) ||
+        (e.detail||'').toLowerCase().includes(textFilter)
+    );
+    if (actionFilter) filtered = filtered.filter(e => e.action === actionFilter);
+    if (userFilter) filtered = filtered.filter(e => e.user?.toLowerCase() === userFilter);
+
+    document.getElementById('activityLog').innerHTML = filtered.length
+        ? filtered.map(e => `<div class="log-entry"><span class="log-ts">${fmtDate(e.ts)}</span> <span class="log-action">${escHtml(e.action||'')}</span> <span class="log-user">${escHtml(e.user||'')}</span> <span class="log-detail">${escHtml(e.detail||e.session||'')}</span></div>`).join('')
+        : '<div class="empty-state">No activity matching filters</div>';
+}
+
+function filterActivity() { renderActivity(); }
+
+// ═══════════════════════════════════════════════════════
+//  PROCESSES
+// ═══════════════════════════════════════════════════════
+async function loadProcesses() {
+    const procs = await api('/api/processes');
+    const el = document.getElementById('processCards');
+    if (!procs || !procs.length) { el.innerHTML = '<div class="empty-state">No protected processes registered</div>'; return; }
+    el.innerHTML = procs.map(p => `
+        <div class="process-card">
+            <div class="pid">PID ${p.pid}</div>
+            <div class="info">
+                <div class="desc">${escHtml(p.description || 'No description')}</div>
+                <div class="meta">Owner: ${escHtml(p.owner||'unknown')} | Category: ${escHtml(p.category||'-')} | Registered: ${fmtDate(p.registered_at)}</div>
+                ${p.locked ? '<div class="locked">LOCKED</div>' : ''}
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="deregisterProcess(${p.pid})" ${p.locked ? 'disabled title="Locked"' : ''}>Remove</button>
+        </div>`
+    ).join('');
+}
+
+async function deregisterProcess(pid) {
+    if (!confirm(`Remove PID ${pid} from registry?`)) return;
+    await api(`/api/processes/${pid}`, { method: 'DELETE' });
+    toast('Process deregistered', 'success');
+    loadProcesses();
+}
+
+// ═══════════════════════════════════════════════════════
+//  AGENT
+// ═══════════════════════════════════════════════════════
+async function loadAgent() {
+    const [config, status, log] = await Promise.all([
+        api('/api/agent/config'),
+        api('/api/agent/status'),
+        api('/api/agent/log').catch(() => []),
+    ]);
+    window._agentConfig = config;
+    window._agentStatus = status;
+    window._agentLog = log;
+
+    if (status?.enabled) {
+        document.getElementById('agentToggleBtn').textContent = 'Disable';
+        document.getElementById('agentToggleBtn').className = 'btn btn-danger';
+    } else {
+        document.getElementById('agentToggleBtn').textContent = 'Enable';
+        document.getElementById('agentToggleBtn').className = 'btn btn-primary';
+    }
+
+    showAgentTab(currentAgentTab);
+}
+
+function showAgentTab(tab) {
+    currentAgentTab = tab;
+    document.querySelectorAll('#sec-agent .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#sec-agent .tab')[['config','schedules','log','instructions','reports'].indexOf(tab)]?.classList.add('active');
+
+    const el = document.getElementById('agentContent');
+    const config = window._agentConfig || {};
+    const status = window._agentStatus || {};
+    const log = window._agentLog || [];
+
+    if (tab === 'config') {
+        el.innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div class="stat-card"><div class="label">Status</div><div class="value" style="font-size:20px;color:${status.enabled?'var(--success)':'var(--text-dim)'}">${status.enabled?'Enabled':'Disabled'}</div></div>
+                <div class="stat-card"><div class="label">Session</div><div class="value" style="font-size:14px;font-family:monospace">${config.session_id||'None'}</div></div>
+                <div class="stat-card"><div class="label">Next Run</div><div class="value" style="font-size:16px">${status.next_run ? fmtDate(status.next_run) : 'N/A'}</div></div>
+                <div class="stat-card"><div class="label">Total Runs</div><div class="value">${log.length||0}</div></div>
+            </div>`;
+    } else if (tab === 'schedules') {
+        const schedules = config.schedules || [];
+        const lastRuns = config.last_runs || {};
+        el.innerHTML = schedules.length ? schedules.map(s => `
+            <div class="schedule-item">
+                <div class="name">${escHtml(s.name)}</div>
+                <div class="cron">${escHtml(s.cron)}</div>
+                <div class="last-run">Last: ${lastRuns[s.name] ? fmtDate(lastRuns[s.name]) : 'Never'}</div>
+            </div>`).join('') : '<div class="empty-state">No schedules configured</div>';
+    } else if (tab === 'log') {
+        el.innerHTML = `<div class="log-container" style="max-height:none;flex:1;">${
+            log.length ? log.slice(-100).reverse().map(e =>
+                `<div class="log-entry"><span class="log-ts">${fmtDate(e.timestamp||e.ts)}</span> <span class="log-action">${escHtml(e.trigger||e.type||'run')}</span> <span class="log-detail">${escHtml((e.summary||e.detail||'').substring(0,200))}</span></div>`
+            ).join('') : '<div class="empty-state">No execution history</div>'
+        }</div>`;
+    } else if (tab === 'instructions') {
+        api('/api/agent/instructions').then(data => {
+            el.innerHTML = `
+                <textarea class="form-input" id="agentInstructions" style="height:300px;font-family:monospace;font-size:13px;resize:vertical;">${escHtml(data?.instructions || '')}</textarea>
+                <div style="margin-top:12px;"><button class="btn btn-primary" onclick="saveAgentInstructions()">Save Instructions</button></div>`;
+        });
+        return;
+    } else if (tab === 'reports') {
+        api('/api/agent/reports').then(data => {
+            if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No reports generated</div>'; return; }
+            el.innerHTML = data.map(r => `
+                <div class="process-card" style="cursor:pointer" onclick="viewReport('${escHtml(r)}')">
+                    <div style="flex:1;font-size:14px;">${escHtml(r)}</div>
+                    <button class="btn btn-sm btn-ghost">View</button>
+                </div>`).join('');
+        });
+        return;
+    }
+}
+
+async function toggleAgent() {
+    await api('/api/agent/toggle', { method: 'POST' });
+    toast('Agent toggled', 'success');
+    loadAgent();
+}
+
+async function triggerAgent() {
+    const res = await api('/api/agent/trigger', { method: 'POST' });
+    if (res) toast('Agent triggered', 'success');
+}
+
+async function saveAgentInstructions() {
+    const text = document.getElementById('agentInstructions').value;
+    await api('/api/agent/instructions', { method: 'POST', body: JSON.stringify({ instructions: text }) });
+    toast('Instructions saved', 'success');
+}
+
+async function viewReport(filename) {
+    const data = await api(`/api/agent/reports/${filename}`);
+    if (!data) return;
+    openModal('sessionDetail', { name: filename, id: '', message_count: 0, base_prompt: data.content || data });
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOOLS
+// ═══════════════════════════════════════════════════════
+async function loadTools() {
+    const [tools, config, log] = await Promise.all([
+        api('/api/tools'),
+        api('/api/tools/config').catch(() => ({})),
+        api('/api/tools/log').catch(() => []),
+    ]);
+    window._toolsData = tools;
+    window._toolsConfig = config;
+    window._toolsLog = log;
+    showToolsTab(currentToolsTab);
+}
+
+function showToolsTab(tab) {
+    currentToolsTab = tab;
+    document.querySelectorAll('#sec-tools .tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#sec-tools .tab')[['registry','config','execlog'].indexOf(tab)]?.classList.add('active');
+
+    const el = document.getElementById('toolsContent');
+    const tools = window._toolsData || [];
+    const config = window._toolsConfig || {};
+    const log = window._toolsLog || [];
+
+    if (tab === 'registry') {
+        el.innerHTML = tools.length ? tools.map(t => `
+            <div class="tool-card">
+                <div class="tool-header">
+                    <div class="tool-name">${escHtml(t.name)}</div>
+                    <span class="tool-status" style="background:${t.configured?'#065f46':'#7f1d1d'};color:${t.configured?'#d1fae5':'#fecaca'};">${t.configured ? 'Configured' : 'Not Configured'}</span>
+                </div>
+                <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">${escHtml(t.description||'')}</div>
+                <div class="tool-actions-list">${(t.actions||[]).map(a => `<span class="tool-action-tag">${escHtml(typeof a === 'string' ? a : a.name || Object.keys(a)[0] || '')}</span>`).join('')}</div>
+            </div>`).join('') : '<div class="empty-state">No tools registered</div>';
+    } else if (tab === 'config') {
+        el.innerHTML = `
+            <pre style="background:var(--surface);padding:16px;border-radius:8px;font-size:12px;overflow:auto;max-height:500px;border:1px solid var(--border);">${escHtml(JSON.stringify(config, null, 2))}</pre>
+            <div style="margin-top:12px;font-size:12px;color:var(--text-dim);">Edit tool credentials via the API or directly in data/agent/tools_config.json</div>`;
+    } else if (tab === 'execlog') {
+        el.innerHTML = `<div class="log-container" style="max-height:none;flex:1;">${
+            log.length ? log.slice(-100).reverse().map(e =>
+                `<div class="log-entry"><span class="log-ts">${fmtDate(e.timestamp||e.ts)}</span> <span class="log-action">${escHtml(e.tool||'')}:${escHtml(e.action||'')}</span> <span class="log-detail">${escHtml((e.result||'').substring?.(0,150)||JSON.stringify(e.result||'').substring(0,150))}</span></div>`
+            ).join('') : '<div class="empty-state">No tool executions recorded</div>'
+        }</div>`;
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+//  INVITES
+// ═══════════════════════════════════════════════════════
+async function loadInvites() {
+    const data = await api('/api/admin/invites');
+    if (!data) { document.getElementById('invitesList').innerHTML = '<div class="empty-state">No invites</div>'; return; }
+    const invites = Array.isArray(data) ? data : Object.values(data);
+    document.getElementById('invitesList').innerHTML = invites.length ? invites.map(inv => `
+        <div class="invite-card">
+            <div class="invite-code ${inv.active ? 'invite-active' : 'invite-revoked'}">${escHtml(inv.code)}</div>
+            <div class="invite-meta">
+                <div>Created by ${escHtml(inv.created_by||'admin')} on ${fmtDateShort(inv.created)}</div>
+                <div>Max uses: ${inv.max_uses||'unlimited'} | Used: ${(inv.used_by||[]).length}</div>
+                ${inv.note ? `<div>Note: ${escHtml(inv.note)}</div>` : ''}
+                ${(inv.used_by||[]).length ? `<div>Used by: ${inv.used_by.map(u=>escHtml(u.username||u)).join(', ')}</div>` : ''}
+            </div>
+            ${inv.active ? `<button class="btn btn-sm btn-danger" onclick="revokeInvite('${escHtml(inv.code)}')">Revoke</button>` : '<span style="color:var(--error);font-size:12px;">Revoked</span>'}
+        </div>`
+    ).join('') : '<div class="empty-state">No invite codes created yet</div>';
+}
+
+async function createInvite() {
+    const max_uses = parseInt(document.getElementById('inviteMaxUses').value) || 0;
+    const note = document.getElementById('inviteNote').value.trim();
+    const res = await api('/api/admin/invites', {
+        method: 'POST', body: JSON.stringify({ max_uses, note })
+    });
+    if (res) {
+        toast(`Invite created: ${res.code}`, 'success');
+        closeModal();
+        loadInvites();
+    }
+}
+
+async function revokeInvite(code) {
+    if (!confirm(`Revoke invite "${code}"?`)) return;
+    await api(`/api/admin/invites/${code}`, { method: 'DELETE' });
+    toast('Invite revoked', 'success');
+    loadInvites();
+}
+
+// ═══════════════════════════════════════════════════════
+//  SERVER STATUS
+// ═══════════════════════════════════════════════════════
+async function loadServer() {
+    const el = document.getElementById('serverGrid');
+    el.innerHTML = '<div class="empty-state">Checking infrastructure...</div>';
+
+    // Check endpoints in parallel
+    const checks = await Promise.allSettled([
+        fetch('/api/auth/me').then(r => ({ status: r.status, ok: r.ok })),
+        fetch('/api/agent/status').then(r => r.json()).catch(() => null),
+        fetch('/api/relay/status').then(r => r.json()).catch(() => null),
+        fetch('/api/admin/sentinel/status').then(r => r.json()).catch(() => null),
+        fetch('/api/processes').then(r => r.json()).catch(() => null),
+        fetch('/api/memory/stats').then(r => r.json()).catch(() => null),
+        fetch('/api/wos/status').then(r => r.json()).catch(() => null),
+    ]);
+
+    const [authCheck, agentStatus, relayStatus, sentinelStatus, processes, memStats, wosStatus] =
+        checks.map(c => c.status === 'fulfilled' ? c.value : null);
+
+    el.innerHTML = `
+        <div class="server-card">
+            <h3><span class="status-dot ${authCheck?.ok ? 'status-online' : 'status-offline'}"></span>Harness API</h3>
+            <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val" style="color:${authCheck?.ok?'var(--success)':'var(--error)'}">${authCheck?.ok ? 'Online' : 'Down'}</span></div>
+            <div class="detail-row"><span class="detail-key">Auth Response</span><span class="detail-val">${authCheck?.status || 'N/A'}</span></div>
+        </div>
+
+        <div class="server-card">
+            <h3><span class="status-dot ${agentStatus?.enabled ? 'status-online' : 'status-offline'}"></span>Agent Scheduler</h3>
+            <div class="detail-row"><span class="detail-key">Enabled</span><span class="detail-val">${agentStatus?.enabled ? 'Yes' : 'No'}</span></div>
+            <div class="detail-row"><span class="detail-key">Next Run</span><span class="detail-val">${agentStatus?.next_run ? fmtDate(agentStatus.next_run) : 'N/A'}</span></div>
+            <div class="detail-row"><span class="detail-key">Session</span><span class="detail-val" style="font-size:10px">${agentStatus?.session_id || 'None'}</span></div>
+        </div>
+
+        <div class="server-card">
+            <h3><span class="status-dot ${relayStatus && !relayStatus.error ? 'status-online' : 'status-offline'}"></span>Relay Bridge</h3>
+            <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val">${relayStatus?.status || relayStatus?.error || 'Unknown'}</span></div>
+            ${relayStatus?.channels ? `<div class="detail-row"><span class="detail-key">Channels</span><span class="detail-val">${relayStatus.channels}</span></div>` : ''}
+        </div>
+
+        <div class="server-card">
+            <h3><span class="status-dot ${sentinelStatus?.active ? 'status-online' : 'status-offline'}"></span>Sentinel</h3>
+            <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val">${sentinelStatus?.active ? 'Monitoring' : 'Inactive'}</span></div>
+            ${sentinelStatus?.events ? `<div class="detail-row"><span class="detail-key">Events</span><span class="detail-val">${sentinelStatus.events}</span></div>` : ''}
+        </div>
+
+        <div class="server-card">
+            <h3><span class="status-dot status-online"></span>Process Registry</h3>
+            <div class="detail-row"><span class="detail-key">Protected</span><span class="detail-val">${processes?.length || 0} processes</span></div>
+            <div class="detail-row"><span class="detail-key">Locked</span><span class="detail-val">${processes?.filter(p=>p.locked).length || 0}</span></div>
+        </div>
+
+        <div class="server-card">
+            <h3><span class="status-dot ${memStats ? 'status-online' : 'status-offline'}"></span>Memory</h3>
+            ${memStats ? Object.entries(memStats).slice(0,4).map(([k,v]) =>
+                `<div class="detail-row"><span class="detail-key">${escHtml(k)}</span><span class="detail-val">${typeof v === 'number' ? v.toLocaleString() : v}</span></div>`
+            ).join('') : '<div class="detail-row"><span class="detail-key">Status</span><span class="detail-val">N/A</span></div>'}
+        </div>
+
+        <div class="server-card">
+            <h3><span class="status-dot ${wosStatus?.active ? 'status-online' : 'status-offline'}"></span>W-OS</h3>
+            <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val">${wosStatus?.active ? 'Active' : 'Inactive'}</span></div>
+            ${wosStatus?.state ? `<div class="detail-row"><span class="detail-key">State</span><span class="detail-val">${escHtml(JSON.stringify(wosStatus.state).substring(0,50))}</span></div>` : ''}
+        </div>
+    `;
+}
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+async function loadAll() {
+    refreshDashboard();
+}
+
+(async () => {
+    if (await checkAuth()) { loadAll(); }
+})();
+</script>
+</body>
+</html>

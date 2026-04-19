@@ -1,0 +1,47 @@
+# Runtime
+*.log
+*.err
+*.pid
+.harness.pid
+
+# Data directories — runtime state, not code
+data/sessions/*
+data/users/*
+data/uploads/*
+data/rooms/*
+data/artifacts/*
+data/jobs/*
+data/agent/*
+data/logs/*
+data/wos/*
+data/semantic_memory/*
+data/projects/*
+data/documents/*
+!data/sessions/.gitkeep
+!data/users/.gitkeep
+!data/uploads/.gitkeep
+!data/rooms/.gitkeep
+!data/artifacts/.gitkeep
+!data/jobs/.gitkeep
+!data/agent/.gitkeep
+!data/logs/.gitkeep
+!data/wos/.gitkeep
+!data/semantic_memory/.gitkeep
+!data/projects/.gitkeep
+!data/documents/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# Local env
+.env

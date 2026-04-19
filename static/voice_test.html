@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html><head><title>Voice Test</title>
+<style>
+body { background: #1a1a2e; color: #eee; font-family: monospace; padding: 20px; }
+.log { background: #0f0f23; padding: 10px; border-radius: 8px; max-height: 400px; overflow-y: auto; font-size: 12px; margin: 10px 0; }
+.log div { padding: 2px 0; }
+.ok { color: #0f0; } .err { color: #f44; } .info { color: #4af; }
+button { background: #4a9; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin: 5px; font-size: 16px; }
+button:disabled { opacity: 0.4; }
+video, audio { border: 2px solid #4a9; border-radius: 8px; margin: 5px; }
+#remoteVideo { width: 320px; height: 240px; background: #000; }
+#localVideo { width: 160px; height: 120px; background: #222; }
+</style>
+</head><body>
+<h2>Voice/Video Diagnostic Test</h2>
+<div>
+  <input id="targetUser" placeholder="Call who? (username)" style="padding:8px; font-size:14px; background:#222; color:#fff; border:1px solid #555; border-radius:4px;">
+  <button id="callBtn" onclick="startCall()" disabled>Call (audio)</button>
+  <button id="callVideoBtn" onclick="startCall(true)" disabled>Call (video)</button>
+  <button id="hangupBtn" onclick="hangup()" disabled>Hang up</button>
+</div>
+<div style="margin:10px 0;">
+  <video id="localVideo" autoplay muted playsinline></video>
+  <video id="remoteVideo" autoplay playsinline></video>
+  <audio id="remoteAudio" autoplay></audio>
+</div>
+<div id="statusBox" style="font-size:18px; color:#ff0; margin:10px 0;">Not connected</div>
+<div class="log" id="logBox"></div>
+
+<script>
+let ws, pc, localStream, callId, myUsername, token;
+
+function log(msg, cls='info') {
+  const box = document.getElementById('logBox');
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  console.log(msg);
+}
+function status(msg) { document.getElementById('statusBox').textContent = msg; }
+
+// Step 1: Login
+async function init() {
+  log('Step 1: Checking auth...');
+  try {
+    const res = await fetch('/api/auth/me');
+    if (!res.ok) { log('Not logged in — redirecting to login', 'err'); status('Not logged in'); return; }
+    const data = await res.json();
+    myUsername = data.username;
+    token = data.token;
+    log(`Logged in as: ${myUsername}`, 'ok');
+    status(`Logged in as ${myUsername}`);
+    connectWs();
+  } catch(e) { log('Auth error: ' + e, 'err'); }
+}
+
+// Step 2: Connect voice WS
+function connectWs() {
+  log('Step 2: Connecting voice WebSocket...');
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}/ws/voice?token=${token}`);
+  ws.onopen = () => {
+    log('Voice WS connected!', 'ok');
+    status('Ready — enter username and call');
+    document.getElementById('callBtn').disabled = false;
+    document.getElementById('callVideoBtn').disabled = false;
+  };
+  ws.onclose = (e) => { log(`Voice WS closed: code=${e.code} reason=${e.reason}`, 'err'); status('Disconnected'); };
+  ws.onerror = (e) => { log('Voice WS error', 'err'); };
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    handleMessage(data);
+  };
+}
+
+// Step 3: Handle messages
+function handleMessage(data) {
+  log(`Recv: ${data.type} ${JSON.stringify(data).substring(0, 120)}`);
+
+  switch(data.type) {
+    case 'voice_presence':
+      log(`Online: ${data.online?.join(', ') || 'none'}`, 'info');
+      break;
+
+    case 'incoming_call':
+      log(`INCOMING CALL from ${data.from} (${data.video ? 'video' : 'audio'})`, 'ok');
+      callId = data.call_id;
+      if (confirm(`Accept call from ${data.display_name || data.from}?`)) {
+        acceptCall(data);
+      } else {
+        ws.send(JSON.stringify({type: 'call_reject', call_id: data.call_id}));
+      }
+      break;
+
+    case 'call_ringing':
+      log('Ringing...', 'info');
+      status('Ringing...');
+      callId = data.call_id;
+      break;
+
+    case 'call_connected':
+      log(`CALL CONNECTED! participants: ${Object.keys(data.participants).join(', ')}, joined: ${data.joined}`, 'ok');
+      status('Call connected — setting up WebRTC');
+      callId = data.call_id;
+      const iAmJoiner = data.joined === myUsername;
+      for (const peerUser of Object.keys(data.participants)) {
+        if (peerUser === myUsername) continue;
+        log(`Creating peer for ${peerUser}, I am ${iAmJoiner ? 'joiner (will create offer)' : 'waiting for offer'}`, 'info');
+        createPeer(peerUser, iAmJoiner);
+      }
+      break;
+
+    case 'offer':
+      log(`GOT OFFER from ${data.from}, payload type: ${data.payload?.type}, sdp length: ${data.payload?.sdp?.length || 0}`, 'ok');
+      handleOffer(data.from, data.payload);
+      break;
+
+    case 'answer':
+      log(`GOT ANSWER from ${data.from}, payload type: ${data.payload?.type}, sdp length: ${data.payload?.sdp?.length || 0}`, 'ok');
+      handleAnswer(data.from, data.payload);
+      break;
+
+    case 'ice':
+      log(`GOT ICE from ${data.from}: ${data.payload?.candidate?.substring(0, 60) || 'null'}`, 'info');
+      handleIce(data.from, data.payload);
+      break;
+
+    case 'call_error':
+      log(`CALL ERROR: ${data.error}`, 'err');
+      status('Error: ' + data.error);
+      break;
+
+    case 'call_rejected':
+    case 'call_ended':
+      log('Call ended', 'info');
+      cleanup();
+      break;
+  }
+}
+
+// Step 4: Start a call
+async function startCall(withVideo) {
+  const target = document.getElementById('targetUser').value.trim();
+  if (!target) { alert('Enter a username to call'); return; }
+
+  log('Step 3: Getting local media...', 'info');
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: {echoCancellation: true, noiseSuppression: true},
+      video: withVideo ? {width: {ideal: 640}, height: {ideal: 480}} : false
+    });
+    log(`Local media: ${localStream.getTracks().map(t => t.kind + ':' + t.readyState).join(', ')}`, 'ok');
+    document.getElementById('localVideo').srcObject = localStream;
+  } catch(e) {
+    log('getUserMedia FAILED: ' + e.name + ': ' + e.message, 'err');
+    status('Media access denied');
+    return;
+  }
+
+  log(`Step 4: Calling ${target}...`, 'info');
+  ws.send(JSON.stringify({type: 'call_user', target, video: !!withVideo}));
+  document.getElementById('hangupBtn').disabled = false;
+  document.getElementById('callBtn').disabled = true;
+  document.getElementById('callVideoBtn').disabled = true;
+}
+
+async function acceptCall(data) {
+  log('Accepting call...', 'info');
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: {echoCancellation: true, noiseSuppression: true},
+      video: data.video ? {width: {ideal: 640}, height: {ideal: 480}} : false
+    });
+    log(`Local media: ${localStream.getTracks().map(t => t.kind + ':' + t.readyState).join(', ')}`, 'ok');
+    document.getElementById('localVideo').srcObject = localStream;
+  } catch(e) {
+    log('getUserMedia FAILED: ' + e.name + ': ' + e.message, 'err');
+    return;
+  }
+  ws.send(JSON.stringify({type: 'call_accept', call_id: data.call_id, video: data.video}));
+  document.getElementById('hangupBtn').disabled = false;
+}
+
+// Step 5: WebRTC peer connection
+async function createPeer(peerUser, initiator) {
+  log(`Creating RTCPeerConnection for ${peerUser}...`, 'info');
+
+  // Get ICE config
+  let iceConfig = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
+  try {
+    const res = await fetch('/api/voice/rtc-config', {credentials: 'include'});
+    iceConfig = await res.json();
+    log(`ICE config: ${iceConfig.iceServers?.length} servers (${iceConfig.iceServers?.map(s => Array.isArray(s.urls) ? s.urls[0] : s.urls).join(', ')})`, 'info');
+  } catch(e) { log('RTC config fetch failed, using STUN only', 'err'); }
+
+  pc = new RTCPeerConnection(iceConfig);
+
+  // Add local tracks
+  if (localStream) {
+    localStream.getTracks().forEach(t => {
+      pc.addTrack(t, localStream);
+      log(`Added local track: ${t.kind} (${t.readyState})`, 'info');
+    });
+  } else {
+    log('WARNING: No local stream to add!', 'err');
+  }
+
+  // ICE candidates
+  pc.onicecandidate = (e) => {
+    if (e.candidate) {
+      log(`Sending ICE candidate: ${e.candidate.candidate.substring(0, 60)}`, 'info');
+      ws.send(JSON.stringify({type: 'ice', target: peerUser, payload: e.candidate}));
+    } else {
+      log('ICE gathering complete', 'ok');
+    }
+  };
+
+  pc.onicecandidateerror = (e) => {
+    log(`ICE error: code=${e.errorCode} ${e.errorText || ''}`, 'err');
+  };
+
+  // Connection state
+  pc.onconnectionstatechange = () => {
+    const state = pc.connectionState;
+    log(`Connection state: ${state}`, state === 'connected' ? 'ok' : state === 'failed' ? 'err' : 'info');
+    status(`WebRTC: ${state}`);
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    log(`ICE connection state: ${pc.iceConnectionState}`, pc.iceConnectionState === 'connected' ? 'ok' : 'info');
+  };
+
+  pc.onsignalingstatechange = () => {
+    log(`Signaling state: ${pc.signalingState}`, 'info');
+  };
+
+  pc.onicegatheringstatechange = () => {
+    log(`ICE gathering state: ${pc.iceGatheringState}`, 'info');
+  };
+
+  // Remote tracks
+  pc.ontrack = (e) => {
+    log(`GOT REMOTE TRACK: ${e.track.kind} (${e.track.readyState})`, 'ok');
+    const stream = e.streams[0] || new MediaStream([e.track]);
+    if (e.track.kind === 'video') {
+      document.getElementById('remoteVideo').srcObject = stream;
+      log('Remote video attached to element', 'ok');
+    } else if (e.track.kind === 'audio') {
+      document.getElementById('remoteAudio').srcObject = stream;
+      log('Remote audio attached to element', 'ok');
+    }
+  };
+
+  // Create offer if initiator
+  if (initiator) {
+    log('Creating offer...', 'info');
+    try {
+      const offer = await pc.createOffer();
+      log(`Offer created: SDP length=${offer.sdp.length}`, 'ok');
+      await pc.setLocalDescription(offer);
+      log('Local description set (offer)', 'ok');
+      ws.send(JSON.stringify({type: 'offer', target: peerUser, payload: pc.localDescription}));
+      log(`Offer sent to ${peerUser}`, 'ok');
+    } catch(e) { log('Offer creation FAILED: ' + e, 'err'); }
+  }
+}
+
+let iceCandidateBuffer = [];
+let remoteDescSet = false;
+
+async function handleOffer(from, payload) {
+  if (!pc) {
+    log('No peer connection — creating one for offer', 'info');
+    await createPeer(from, false);
+  }
+  try {
+    log(`Setting remote description (offer), SDP length=${payload?.sdp?.length || 0}`, 'info');
+    await pc.setRemoteDescription(new RTCSessionDescription(payload));
+    remoteDescSet = true;
+    log('Remote description set', 'ok');
+
+    // Flush buffered ICE candidates
+    for (const c of iceCandidateBuffer) {
+      try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(e) { log('Buffered ICE error: ' + e, 'err'); }
+    }
+    log(`Flushed ${iceCandidateBuffer.length} buffered ICE candidates`, 'info');
+    iceCandidateBuffer = [];
+
+    const answer = await pc.createAnswer();
+    log(`Answer created: SDP length=${answer.sdp.length}`, 'ok');
+    await pc.setLocalDescription(answer);
+    log('Local description set (answer)', 'ok');
+    ws.send(JSON.stringify({type: 'answer', target: from, payload: pc.localDescription}));
+    log(`Answer sent to ${from}`, 'ok');
+  } catch(e) { log('Handle offer FAILED: ' + e, 'err'); }
+}
+
+async function handleAnswer(from, payload) {
+  if (!pc) { log('No peer connection for answer!', 'err'); return; }
+  try {
+    log(`Setting remote description (answer), SDP length=${payload?.sdp?.length || 0}`, 'info');
+    await pc.setRemoteDescription(new RTCSessionDescription(payload));
+    remoteDescSet = true;
+    log('Remote description set (answer)', 'ok');
+
+    for (const c of iceCandidateBuffer) {
+      try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch(e) { log('Buffered ICE error: ' + e, 'err'); }
+    }
+    log(`Flushed ${iceCandidateBuffer.length} buffered ICE candidates`, 'info');
+    iceCandidateBuffer = [];
+  } catch(e) { log('Handle answer FAILED: ' + e, 'err'); }
+}
+
+async function handleIce(from, payload) {
+  if (!payload) return;
+  if (!pc || !remoteDescSet) {
+    iceCandidateBuffer.push(payload);
+    log(`Buffered ICE candidate (${iceCandidateBuffer.length} total)`, 'info');
+    return;
+  }
+  try {
+    await pc.addIceCandidate(new RTCIceCandidate(payload));
+    log('ICE candidate added', 'info');
+  } catch(e) { log('ICE add error: ' + e, 'err'); }
+}
+
+function hangup() {
+  ws.send(JSON.stringify({type: 'call_hangup'}));
+  cleanup();
+}
+
+function cleanup() {
+  if (pc) { pc.close(); pc = null; }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  remoteDescSet = false;
+  iceCandidateBuffer = [];
+  callId = null;
+  document.getElementById('localVideo').srcObject = null;
+  document.getElementById('remoteVideo').srcObject = null;
+  document.getElementById('remoteAudio').srcObject = null;
+  document.getElementById('callBtn').disabled = false;
+  document.getElementById('callVideoBtn').disabled = false;
+  document.getElementById('hangupBtn').disabled = true;
+  status('Call ended');
+  log('Cleaned up', 'info');
+}
+
+init();
+</script>
+</body></html>
