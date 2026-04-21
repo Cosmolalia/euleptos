@@ -20,19 +20,58 @@ Euleptos runs on your machine. Your conversations, artifacts, and context live i
 
 ## Install
 
-Requires **Python 3.10+** and an Anthropic API key.
+Requires **Python 3.10+**. Anthropic API key is optional — Euleptos works with local Ollama models too.
+
+### One-line install (recommended)
+
+**Mac / Linux:**
+```bash
+curl -fsSL https://euleptos.com/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://euleptos.com/install.ps1 | iex
+```
+
+The installer:
+- Checks Python 3.10+
+- Downloads + extracts Euleptos to `~/euleptos`
+- Installs the small set of pip dependencies
+- Detects [Ollama](https://ollama.com) and auto-installs it if missing (with consent)
+- Pulls `llama3.2:3b` (~2 GB) so you have a working local model out of the box
+- Creates `.env` with a placeholder for your Anthropic key (optional)
+
+Then:
+```bash
+cd ~/euleptos && python3 server.py
+```
+Open `http://localhost:8080`.
+
+### Manual install
 
 ```bash
 git clone https://github.com/Cosmolalia/euleptos.git
 cd euleptos
-pip install -r requirements.txt       # or: pip install fastapi uvicorn anthropic python-multipart websockets
-cp .env.example .env                  # then edit .env — set ANTHROPIC_API_KEY
+pip install -r requirements.txt
+echo "ANTHROPIC_API_KEY=" > .env       # optional — fill in to use Claude
 python3 server.py
 ```
 
-Open `http://localhost:8080`.
+**Windows:** double-click `start_dist.bat` after creating `.env`.
 
-**Windows:** double-click `start_dist.bat` after editing `.env`.
+### Local models via Ollama
+
+Euleptos auto-detects Ollama on `localhost:11434` — any models you've pulled show up in the model picker as `ollama:<name>`. To add more models:
+
+```bash
+ollama pull qwen2.5:7b           # 4 GB, balanced
+ollama pull llama3.1:8b          # 5 GB, well-rounded
+ollama pull deepseek-coder:6.7b  # 4 GB, code-focused
+ollama pull gpt-oss:20b          # 13 GB, large-and-slow but high-quality
+```
+
+Browse the catalog at [ollama.com/library](https://ollama.com/library). The harness queries Ollama silently — if Ollama isn't running, only Claude models appear.
 
 ---
 
