@@ -89,7 +89,23 @@ if (Test-Path $reqFile) {
 if ($LASTEXITCODE -ne 0) { Die "pip install failed." }
 Ok "Deps installed"
 
-# --------------------------------------------------------- 4. Ollama
+# --------------------------------------------------------- 4. Claude Code detection
+$claudeAvailable = $false
+Say "`n-> Checking Claude Code"
+$claude = Get-Command claude -ErrorAction SilentlyContinue
+if ($claude) {
+    $ccVersion = try { (& claude --version 2>$null | Select-Object -First 1) } catch { 'installed' }
+    Ok "Claude Code detected ($ccVersion)"
+    Dim "Euleptos will drive it directly — no API key needed."
+    $claudeAvailable = $true
+} else {
+    Warn "Claude Code not found on PATH"
+    Dim "Euleptos primarily drives your existing 'claude' CLI — no API key required."
+    Dim "Install it from: https://docs.anthropic.com/en/docs/claude-code"
+    Dim "(You can still run Euleptos with Ollama-only — skip this and continue.)"
+}
+
+# --------------------------------------------------------- 5. Ollama
 $ollamaAvailable = $false
 if ($env:EULEPTOS_NO_OLLAMA -ne '1') {
     Say "`n-> Checking Ollama (local model runner)"
@@ -164,18 +180,22 @@ if ($ollamaAvailable -and ($env:EULEPTOS_NO_PULL -ne '1')) {
 }
 
 # --------------------------------------------------------- 7. .env
-Say "`n-> Configuring API keys"
+Say "`n-> Configuring optional API key"
 $envFile = Join-Path $InstallDir '.env'
 if (Test-Path $envFile) {
     Ok ".env already exists, leaving alone"
 } else {
     @"
-# Optional: Anthropic API key (for Claude models)
-#   Get one at https://console.anthropic.com/
-#   Leave blank if you only want local Ollama models.
+# Anthropic API key — OPTIONAL.
+#
+# Euleptos uses your existing Claude Code install by default (no key needed).
+# Leave this blank unless you specifically want "Pure Mode" — a bypass that
+# hits the raw Anthropic API directly instead of going through claude -p.
+#
+#   Get one (only if you want Pure Mode): https://console.anthropic.com/
 ANTHROPIC_API_KEY=
 "@ | Out-File -FilePath $envFile -Encoding utf8 -NoNewline
-    Ok "Created .env (Anthropic key optional — Ollama works without it)"
+    Ok "Created .env stub (API key optional — leave blank for default Claude Code flow)"
 }
 
 # --------------------------------------------------------- 8. Done
@@ -191,11 +211,12 @@ Write-Host "    .\start_dist.bat   (or: $pyExe server.py)" -ForegroundColor Cyan
 Write-Host ''
 Write-Host "  Then open: http://localhost:$port" -ForegroundColor Cyan
 Write-Host ''
-if ($ollamaAvailable) {
-    Dim "Ollama models will appear in the model picker automatically."
+if ($claudeAvailable) {
+    Dim "Claude Code is wired in — no API key needed. Just go."
+} else {
+    Dim "Install Claude Code (no API key needed) to use Claude: https://docs.anthropic.com/en/docs/claude-code"
 }
-$envContent = Get-Content $envFile -Raw -ErrorAction SilentlyContinue
-if ($envContent -match "(?m)^ANTHROPIC_API_KEY=\s*$") {
-    Dim "Tip: add an Anthropic key to $envFile to also use Claude models."
+if ($ollamaAvailable) {
+    Dim "Ollama models appear in the picker as ollama:<name>."
 }
 Write-Host ''

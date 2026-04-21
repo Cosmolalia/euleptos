@@ -106,7 +106,22 @@ else
 fi
 ok "Deps installed"
 
-# ---------------------------------------------------------------- 5. Ollama
+# ---------------------------------------------------------------- 5. Claude Code detection
+CLAUDE_AVAILABLE=0
+say "→ Checking Claude Code"
+if command -v claude >/dev/null 2>&1; then
+    CC_VERSION=$(claude --version 2>/dev/null | head -1 || echo "installed")
+    ok "Claude Code detected ($CC_VERSION)"
+    dim "Euleptos will drive it directly — no API key needed."
+    CLAUDE_AVAILABLE=1
+else
+    warn "Claude Code not found on PATH"
+    dim "Euleptos primarily drives your existing 'claude' CLI — no API key required."
+    dim "Install it from: https://docs.anthropic.com/en/docs/claude-code"
+    dim "(You can still run Euleptos with Ollama-only — skip this and continue.)"
+fi
+
+# ---------------------------------------------------------------- 6. Ollama
 OLLAMA_AVAILABLE=0
 if [ "${EULEPTOS_NO_OLLAMA:-}" != "1" ]; then
     say "→ Checking Ollama (local model runner)"
@@ -184,21 +199,25 @@ if [ "$OLLAMA_AVAILABLE" = "1" ] && [ "${EULEPTOS_NO_PULL:-}" != "1" ]; then
     fi
 fi
 
-# ---------------------------------------------------------------- 8. .env
-say "→ Configuring API keys"
+# ---------------------------------------------------------------- 9. .env
+say "→ Configuring optional API key"
 if [ -f "$INSTALL_DIR/.env" ]; then
     ok ".env already exists, leaving alone"
 else
     cat > "$INSTALL_DIR/.env" <<'EOF'
-# Optional: Anthropic API key (for Claude models)
-#   Get one at https://console.anthropic.com/
-#   Leave blank if you only want local Ollama models.
+# Anthropic API key — OPTIONAL.
+#
+# Euleptos uses your existing Claude Code install by default (no key needed).
+# Leave this blank unless you specifically want "Pure Mode" — a bypass that
+# hits the raw Anthropic API directly instead of going through claude -p.
+#
+#   Get one (only if you want Pure Mode): https://console.anthropic.com/
 ANTHROPIC_API_KEY=
 EOF
-    ok "Created .env (Anthropic key optional — Ollama works without it)"
+    ok "Created .env stub (API key optional — leave blank for default Claude Code flow)"
 fi
 
-# ---------------------------------------------------------------- 9. Done
+# ---------------------------------------------------------------- 10. Done
 PORT=8080
 printf "\n%b╔════════════════════════════════════════╗%b\n" "$C_GREEN" "$C_NC"
 printf "%b║         ✓ INSTALL COMPLETE              ║%b\n" "$C_GREEN" "$C_NC"
@@ -207,10 +226,12 @@ printf "\n  Start the harness:\n"
 printf "    %bcd %s%b\n" "$C_CYAN" "$INSTALL_DIR" "$C_NC"
 printf "    %bpython3 server.py%b\n" "$C_CYAN" "$C_NC"
 printf "\n  Then open: %bhttp://localhost:%s%b\n\n" "$C_CYAN" "$PORT" "$C_NC"
-if [ "$OLLAMA_AVAILABLE" = "1" ]; then
-    printf "  %bOllama models will appear in the model picker automatically.%b\n" "$C_DIM" "$C_NC"
+if [ "$CLAUDE_AVAILABLE" = "1" ]; then
+    printf "  %bClaude Code is wired in — no API key needed. Just go.%b\n" "$C_DIM" "$C_NC"
+else
+    printf "  %bInstall Claude Code (no API key needed) to use Claude: https://docs.anthropic.com/en/docs/claude-code%b\n" "$C_DIM" "$C_NC"
 fi
-if grep -q "^ANTHROPIC_API_KEY=$" "$INSTALL_DIR/.env" 2>/dev/null; then
-    printf "  %bTip: add an Anthropic key to %s/.env to also use Claude models.%b\n" "$C_DIM" "$INSTALL_DIR" "$C_NC"
+if [ "$OLLAMA_AVAILABLE" = "1" ]; then
+    printf "  %bOllama models appear in the picker as ollama:<name>.%b\n" "$C_DIM" "$C_NC"
 fi
 printf "\n"

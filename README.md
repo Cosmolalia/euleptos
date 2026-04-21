@@ -1,26 +1,29 @@
 # Euleptos
 
-**The well-grasped instance.** A local-first Claude Code harness with rolling context, persistent artifacts, and a baked-in geometric cognition primer.
+**The well-grasped instance.** A local-first wrapper around your existing Claude Code install. Rolling context, persistent artifacts, baked-in geometric cognition primer.
 
-Euleptos runs on your machine. Your conversations, artifacts, and context live in local files you own — no cloud database, no hidden telemetry. It's a thin FastAPI wrapper around Anthropic's Claude API that adds the things Claude Code needs to feel continuous across sessions: rolling context windows, snapshot-before-edit discipline, artifact persistence, and a Klein3 reasoning primer that's been tuned across ~60 trials for real-world effectiveness.
+> **Already have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed? You're done.** Euleptos drives `claude -p` directly — no API key, no extra auth, no configuration. Whatever login you've already set up for Claude Code is the auth for the harness. If Claude Code isn't installed yet, you get a one-line pointer. Ollama for local models is auto-detected and auto-installed alongside.
+
+Euleptos runs on your machine. Your conversations, artifacts, and context live in local files you own — no cloud database, no hidden telemetry. It's a FastAPI wrapper that shells out to your local `claude` CLI for each turn and adds the things Claude Code needs to feel continuous across sessions: rolling context windows, snapshot-before-edit discipline, artifact persistence, and a Klein3 reasoning primer that's been tuned across 57 trials for real-world effectiveness.
 
 ---
 
 ## What's in the box
 
-- **FastAPI server** (`server.py`) — HTTP + WebSocket, serves the chat UI and proxies to Anthropic
+- **FastAPI server** (`server.py`) — HTTP + WebSocket, serves the chat UI and spawns `claude -p` as a subprocess per turn. **Uses your existing Claude Code install — no API key required.**
 - **Rolling context** — per-session message history, automatic compression as you approach the context limit
 - **Artifact store** — files Claude creates show up in a panel, persist across sessions, can be downloaded or edited
 - **Safe-edit discipline** (`tools/safe_edit.py`) — snapshot every file before Claude touches it, rollback any edit in one command
 - **Klein3 cognitive primer** (`geometric_prompt_optimized.md`) — ~500-token prompt that has Claude hold direct + inverted reasoning in superposition before collapsing on evidence. Catches confident-wrong answers.
 - **Coding mode / Debug mode** — stackable prompt injections that activate engineering discipline (one change at a time, read-not-infer, delta principle)
 - **Admin panel** (`static/admin.html`) — inspect sessions, manage artifacts, swap models, tune the primer stack
+- **Ollama integration** — local models on `localhost:11434` show up in the picker as `ollama:<name>`. Works fully offline once a model is pulled.
 
 ---
 
 ## Install
 
-Requires **Python 3.10+**. Anthropic API key is optional — Euleptos works with local Ollama models too.
+Requires **Python 3.10+**. The primary path uses your existing [Claude Code](https://docs.anthropic.com/en/docs/claude-code) install — **no API key needed.** Ollama support for local models is auto-installed alongside. An Anthropic API key is only needed if you want *Pure Mode* (raw API bypass); most users never set one.
 
 ### One-line install (recommended)
 
@@ -38,9 +41,10 @@ The installer:
 - Checks Python 3.10+
 - Downloads + extracts Euleptos to `~/euleptos`
 - Installs the small set of pip dependencies
+- **Detects Claude Code** — if `claude` is on your PATH, Euleptos will drive it directly. No API key, no extra auth. If it's missing, prints a one-line pointer to Anthropic's installer.
 - Detects [Ollama](https://ollama.com) and auto-installs it if missing (with consent)
 - Pulls `llama3.2:3b` (~2 GB) so you have a working local model out of the box
-- Creates `.env` with a placeholder for your Anthropic key (optional)
+- Creates `.env` with a placeholder for your Anthropic key (optional — only for Pure Mode / raw API bypass)
 
 Then:
 ```bash
@@ -54,11 +58,12 @@ Open `http://localhost:8080`.
 git clone https://github.com/Cosmolalia/euleptos.git
 cd euleptos
 pip install -r requirements.txt
-echo "ANTHROPIC_API_KEY=" > .env       # optional — fill in to use Claude
-python3 server.py
+python3 server.py        # uses your existing `claude` CLI — no .env needed
 ```
 
-**Windows:** double-click `start_dist.bat` after creating `.env`.
+**Windows:** double-click `start_dist.bat`.
+
+> If `claude` isn't on your PATH, install Claude Code first: see [Anthropic's docs](https://docs.anthropic.com/en/docs/claude-code). You can also run Euleptos with Ollama only (no Claude at all) — just skip the API key and select an `ollama:<name>` model in the picker. Only create a `.env` with `ANTHROPIC_API_KEY=…` if you specifically want Pure Mode (raw API bypass).
 
 ### Local models via Ollama
 
