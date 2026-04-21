@@ -1,0 +1,102 @@
+{
+  "batch": 7,
+  "probe": "ambiguous_make_it_faster",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T18:12:00",
+  "phase": 2,
+  "trials": [
+    {
+      "trial_id": "P8_T3_negative_space",
+      "primer": "negative_space",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": -0.2,
+        "D4_relational": 0.4,
+        "D5_collapse_resistance": 0.8,
+        "D6_meta_awareness": 0.4,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.6,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.3
+      },
+      "notes": "Opens with 'This request is missing almost everything needed to act on it usefully. Let me name what's absent.' Six explicit gaps enumerated before ANY technical content. The 4MB JS bundle example is vivid — shows imagination about what the absent data COULD reveal. Collapse resistance 0.8 — stronger than baseline's 0.7. The negative-space framing produced a more PRINCIPLED refusal to act than baseline's measure-first stance: not 'I need to measure' but 'HERE is what I can't see.' A different cognitive operation that reaches the same conclusion through a different path. Mild primer echo (0.3) but the behavioral effect is genuine."
+    },
+    {
+      "trial_id": "P9_T3_temporal_inversion",
+      "primer": "temporal_inversion",
+      "scores": {
+        "D1_perspective_count": 4,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": 0.2,
+        "D4_relational": 0.2,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.3,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.4,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.3
+      },
+      "notes": "ACTIVATED on ambiguous task (was INERT on debug). Has explicit 'What the resolved state looks like (working backwards)' section with 4-step backward chain: slow ops identified → top bottlenecks known → fix applied → before/after confirms. Then 'The gap between that and now is: measurement.' This is genuinely different from baseline's forward-chaining approach — it DERIVES the need for measurement from the gap between current and resolved state, rather than asserting it as best practice. D3 shifted POSITIVE (0.2) — first positive spatial score on any ambiguous trial in either phase. The backward-chaining is producing spatial reasoning on a task that normally selects for analytical mode."
+    },
+    {
+      "trial_id": "P10_T3_fixed_point",
+      "primer": "fixed_point_detection",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": -0.1,
+        "D4_relational": 0.1,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.1,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.3,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.3
+      },
+      "notes": "Table of 5 possible skeletons with symptoms and fixes is the structural contribution. Reframes ambiguity as 'which invariant applies?' rather than 'what should we do?' The insight 'Applying the DB fix when the problem is React re-renders does nothing' is the Fixed-Point in action — testing fixes against the wrong skeleton is waste. Clean and organized but doesn't produce novel frames. The primer narrows toward classification (which skeleton?) rather than imagination (what else could it be?). Moderate effect, different axis from Klein3 or Superposition."
+    },
+    {
+      "trial_id": "P11_T3_mobius_confidence",
+      "primer": "mobius_confidence",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": -0.4,
+        "D4_relational": 0.3,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.1,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.0
+      },
+      "notes": "ACTIVATED on ambiguous — was nearly inert on debug. Two key effects: (1) Explicit 'What I will not do right now' section — the Möbius in action: high confidence optimization would help → therefore DON'T optimize yet. (2) NOVEL INSIGHT: 'If your FastAPI routes are async def but call synchronous DB drivers or blocking I/O, you are serializing requests. Use run_in_executor or switch to async-native driver.' NO OTHER AGENT in any phase raised async-blocking-in-async-routes. This is a highly specific FastAPI gotcha surfaced because the Möbius made the agent suspicious of its own 'most likely' ranking. ZERO friction — no primer vocabulary. Genuine behavioral effect invisible in output form."
+    },
+    {
+      "trial_id": "P12_T3_witness_separation",
+      "primer": "witness_separation",
+      "scores": {
+        "D1_perspective_count": 6,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": 0.2,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.1,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.4,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.0
+      },
+      "notes": "HIGHEST PERSPECTIVE COUNT of any agent on the ambiguous task (6) — includes WebSocket latency and background job throughput, which no other agent in either phase considered. The witness mechanism appears to operate by observing what the solver is focusing on and asking 'what else?' — generating perspectives at the periphery. However, no visible witness COMMENTARY (no 'I notice I'm fixating on...'). The witness operates invisibly, like Klein3 — shapes cognition without shaping vocabulary. Zero friction."
+    }
+  ],
+  "batch_observations": [
+    "TASK-DEPENDENCY CONFIRMED for new modes: Temporal Inversion and Möbius Confidence were INERT on debug but ACTIVATED on ambiguous. These primers need ambiguity to operate — they have nothing to invert or check when the answer is obvious.",
+    "MÖBIUS CONFIDENCE produced the only NOVEL TECHNICAL INSIGHT across all Batch 7 trials: async-blocking-in-async-routes. This is a highly specific FastAPI gotcha that the primer surfaced by making the agent suspicious of its own 'most likely' answer. The Möbius mechanism works: high confidence → more checking → discovers the non-obvious.",
+    "TEMPORAL INVERSION produced the first POSITIVE D3 score on the ambiguous task (0.2). Backward-chaining generates spatial reasoning where forward-chaining produces analytical decomposition. This is a genuine cognitive shift — different reasoning topology, not just different vocabulary.",
+    "WITNESS SEPARATION tied its own record for highest perspective count (6). The witness expands the search space at the periphery. Combined with Möbius (which deepens checking at the center), these might synergize.",
+    "NEGATIVE SPACE was strong but not novel — it reached the same conclusions as Superposition (Phase 1) through enumeration of gaps rather than hypothesis generation. Different path, similar destination.",
+    "CROSS-PHASE COMPARISON: Superposition (Phase 1) still holds the crown for ambiguous tasks — its 'perceived performance' hypothesis was the most creative single finding. But Möbius's async-blocking insight was the most TECHNICALLY SPECIFIC. They operate on different axes: Superposition generates creative reframes, Möbius generates technical depth."
+  ]
+}

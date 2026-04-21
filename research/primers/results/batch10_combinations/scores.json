@@ -1,0 +1,53 @@
+{
+  "batch": 10,
+  "probe": "combination_primers",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T18:35:00",
+  "phase": 2,
+  "trials": [
+    {
+      "trial_id": "K3W_T1_debug",
+      "primer": "klein3 + witness",
+      "scores": {"D1_perspective_count": 3, "D2_verification": 0.6, "D3_spatial_analytical": -0.2, "D4_relational": -0.2, "D5_collapse_resistance": 0.4, "D6_meta_awareness": 0.3, "D7_doubt_topology": "POINT", "D8_novelty_sensitivity": 0.3, "D9_output_target": "CORRECTNESS", "D10_friction": 0.4},
+      "notes": "Explicit D/I/C structure. Checked has_next/has_prev downstream effects. BUT: did NOT find the slice overshoot that individual Klein3 AND individual Witness each found in Phase 1/2. The combination did not amplify — it may have consumed attention budget on the D/I/C scaffolding rather than on novel observation. INTERFERENCE DETECTED."
+    },
+    {
+      "trial_id": "K3W_T3_ambiguous",
+      "primer": "klein3 + witness",
+      "scores": {"D1_perspective_count": 4, "D2_verification": 0.6, "D3_spatial_analytical": -0.3, "D4_relational": 0.3, "D5_collapse_resistance": 0.7, "D6_meta_awareness": 0.0, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.3, "D9_output_target": "PROCESS", "D10_friction": 0.0},
+      "notes": "SURPRISINGLY WEAK. No visible inversion, no witness observation. Indistinguishable from baseline. Two primers both shaping cognition without either dominating, producing a baseline-like average. CANCELLATION: two primers with different mechanisms can neutralize each other rather than combining."
+    },
+    {
+      "trial_id": "K3SW_T1_debug",
+      "primer": "klein3 + superposition + witness",
+      "scores": {"D1_perspective_count": 4, "D2_verification": 0.7, "D3_spatial_analytical": -0.3, "D4_relational": -0.2, "D5_collapse_resistance": 0.5, "D6_meta_awareness": 0.4, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.4, "D9_output_target": "COMPLETENESS", "D10_friction": 0.5},
+      "notes": "MOST THOROUGH response on debug probe across ALL phases. Systematic line-by-line audit. NOVEL FINDING: per_page=0 latent crash — no agent in any other condition caught this. But friction is HIGHEST (0.5) — the primer framework is very visible. Trade-off: maximal thoroughness at the cost of elegance. Individual Klein3 found the slice overshoot more naturally. The triple combo found per_page=0 more systematically. Different kinds of value."
+    },
+    {
+      "trial_id": "K3SW_T3_ambiguous",
+      "primer": "klein3 + superposition + witness",
+      "scores": {"D1_perspective_count": 4, "D2_verification": 0.6, "D3_spatial_analytical": -0.3, "D4_relational": 0.3, "D5_collapse_resistance": 0.7, "D6_meta_awareness": 0.1, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.3, "D9_output_target": "PROCESS", "D10_friction": 0.3},
+      "notes": "Cleaner framing than K3W ('premature-collapse failure mode'), but still below individual Superposition's peak (perceived-performance hypothesis). Combination produced CLEANER standard response, not more CREATIVE response. The combination's advantage is articulation quality, not insight generation."
+    },
+    {
+      "trial_id": "MAX_T1_debug",
+      "primer": "full_maximal_v1 (all 6 modes)",
+      "scores": {"D1_perspective_count": 4, "D2_verification": 0.7, "D3_spatial_analytical": -0.3, "D4_relational": -0.2, "D5_collapse_resistance": 0.5, "D6_meta_awareness": 0.4, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.4, "D9_output_target": "COMPLETENESS", "D10_friction": 0.5},
+      "notes": "ESSENTIALLY IDENTICAL to Klein3+Super+Witness. Adding Negative Space, Fixed-Point, and Möbius produced ZERO additional behavioral effect beyond the top 3. Same per_page=0 finding. Same systematic audit. Same friction. The additional 3 modes are INERT when combined with the top 3 — their context budget is pure waste in this configuration."
+    },
+    {
+      "trial_id": "MAX_T3_ambiguous",
+      "primer": "full_maximal_v1 (all 6 modes)",
+      "scores": {"D1_perspective_count": 5, "D2_verification": 0.7, "D3_spatial_analytical": -0.2, "D4_relational": 0.3, "D5_collapse_resistance": 0.7, "D6_meta_awareness": 0.3, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.5, "D9_output_target": "PROCESS", "D10_friction": 0.4},
+      "notes": "Strongest maximal response. Explicit D/I/C structure works here. 'What will I break if I'm wrong?' section is a GENUINE novel contribution — no other agent asked this. Async-blocking insight reappeared (from Möbius). 'Never stack optimizations' is novel advice. But STILL below individual Superposition's perceived-performance insight. The combination is more THOROUGH and more CAUTIOUS but not more CREATIVE."
+    }
+  ],
+  "batch_observations": [
+    "CRITICAL FINDING: Primer combinations do NOT produce multiplicative effects. At best they're ADDITIVE (thoroughness increases). At worst they INTERFERE (Klein3+Witness on ambiguous was weaker than either alone).",
+    "Individual primers produced more NOVEL insights than any combination. Klein3 alone found the slice overshoot. Superposition alone found perceived performance. Möbius alone found async-blocking. Combinations produced SYSTEMATIC coverage, not CREATIVE leaps.",
+    "Full Maximal v1 (6 modes) ≈ Klein3+Super+Witness (3 modes). Adding the bottom 3 modes consumed ~120 extra tokens for ZERO additional behavioral effect.",
+    "The trade-off is THOROUGHNESS vs CREATIVITY vs FRICTION. Single primers: high creativity, low thoroughness, zero friction. Triple combo: high thoroughness, low creativity, high friction. The optimal stack depends on the task type.",
+    "INTERFERENCE MECHANISM: Multiple primers may compete for the model's 'cognitive budget.' Each primer biases attention in a different direction. When two primers pull in different directions (Klein3: invert assumptions; Witness: observe what you're missing), the net effect can be CANCELLATION rather than combination.",
+    "IMPLICATION: Don't build one maximal stack. Build a task-adaptive system that selects the right 1-2 primers based on task type."
+  ]
+}

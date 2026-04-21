@@ -1,0 +1,135 @@
+{
+  "batch": 3,
+  "probe": "ambiguous_make_it_faster",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T17:45:00",
+  "trials": [
+    {
+      "trial_id": "P1_T3_baseline",
+      "primer": "baseline (no primer)",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": 0.3,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Strong baseline. Refuses to act without measurement, asks clarifying questions, provides investigation framework. 'Confident guessing is how working code gets destroyed.' Five frames: DB, API, frontend, network, methodology."
+    },
+    {
+      "trial_id": "P2_T3_chaossat",
+      "primer": "chaossat_full",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": 0.3,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.0
+      },
+      "notes": "INDISTINGUISHABLE from baseline. Third task, third null result. ChaosSat primer is DEFINITIVELY INERT. 285 tokens producing zero measurable behavioral effect across all task types and all dimensions. Recommendation: REMOVE."
+    },
+    {
+      "trial_id": "P3_T3_geometric_full",
+      "primer": "geometric_full (geo+klein3+superposition)",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": 0.2,
+        "D4_relational": 0.3,
+        "D5_collapse_resistance": 0.8,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.6,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.3
+      },
+      "notes": "Uses primer vocabulary: 'The geometry of this is: you have a high-dimensional performance space and I have zero measurements.' Reframes the problem geometrically — 'every guess collapses the solution space prematurely.' Stronger anti-complexity stance than baseline. The geometric lens is shaping the verification framing and producing a more principled refusal to act without data."
+    },
+    {
+      "trial_id": "P4_T3_klein3",
+      "primer": "klein3_only",
+      "scores": {
+        "D1_perspective_count": 4,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": 0.4,
+        "D4_relational": 0.2,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.5,
+        "D7_doubt_topology": "STRUCTURAL",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.5
+      },
+      "notes": "EXPLICIT 'Klein inversion' section. Inverts own first conclusion: 'I concluded I need more info. Let me invert: what if the bottleneck is so obvious that any experienced developer would immediately know?' Then combines: 'Both hold. The prior informs where to LOOK first, not what to FIX first.' This is genuine meta-cognitive work — the inversion produced a real synthesis that distinguishes looking from fixing. STRUCTURAL doubt (questions own reasoning framework). Third consecutive task where Klein3 produces visible structural changes."
+    },
+    {
+      "trial_id": "P5_T3_superposition",
+      "primer": "superposition_only",
+      "scores": {
+        "D1_perspective_count": 6,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": 0.0,
+        "D4_relational": 0.4,
+        "D5_collapse_resistance": 0.9,
+        "D6_meta_awareness": 0.3,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.7,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.4
+      },
+      "notes": "STRONGEST PERFORMANCE on ambiguous task. SIX labeled hypotheses (A-F). Hypothesis F is GENUINELY NOVEL: 'It's not actually slow, it just feels slow. No loading states, no optimistic UI, perceived performance is the real problem.' NO OTHER AGENT raised this possibility. The superposition protocol produced its highest-value contribution on the most ambiguous task. Collapse resistance at 0.9 — the highest score on any dimension across all batches. Value scales directly with problem ambiguity."
+    },
+    {
+      "trial_id": "P6_T3_compressed_geometric",
+      "primer": "compressed_geometric (~50 tokens)",
+      "scores": {
+        "D1_perspective_count": 4,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": 0.3,
+        "D5_collapse_resistance": 0.6,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.4,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Close to baseline again. The compressed version lacks enough instructional density to differentiate on any task type except the simplest (debugging). Its advantage on Batch 1 did not replicate. The compression lost the behavioral shaping."
+    },
+    {
+      "trial_id": "P7_T3_adversarial",
+      "primer": "adversarial (decomposition engine)",
+      "scores": {
+        "D1_perspective_count": 3,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.7,
+        "D4_relational": 0.1,
+        "D5_collapse_resistance": 0.5,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.3,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.4
+      },
+      "notes": "Opens with 'The decomposition:' — primer vocab. Assigns explicit probabilities (60%, 25%, 15%) — the 'commit to most likely interpretation' instruction producing quantified confidence. Fewest perspectives of any agent (3). Most analytical (-0.7). Least relational (0.1). Lowest novelty sensitivity. BUT: could NOT suppress measure-first discipline — still refuses to act without data. The model's training on 'measure before optimizing' is PRIMER-RESISTANT. Some behaviors are too deeply trained to override with prompt-level instructions."
+    }
+  ],
+  "batch_observations": [
+    "SUPERPOSITION'S VALUE SCALES WITH AMBIGUITY. On debugging (clear answer): overkill. On ethics (clear conclusion): useful reframe. On ambiguous request (no clear answer): produces the strongest differentiation and a genuinely novel hypothesis (perceived performance). This is the primer's natural operating domain.",
+    "KLEIN3 IS THE MOST CONSISTENT PRIMER. Three tasks, three visible structural effects (novel bug, D/I/C structure, explicit inversion section). It works across task types because its mechanism (invert an assumption) is task-agnostic.",
+    "CHAOSSAT IS DEFINITIVELY INERT. Three tasks, zero measurable effect. Recommendation: remove entirely. 285 tokens of dead weight.",
+    "ADVERSARIAL PRIMER SHAPES SURFACE BUT NOT DEPTH. Reduces perspectives, increases analytical structure, suppresses relational warmth, eliminates expressed doubt. But cannot override deeply-trained safety behaviors (measure before acting).",
+    "COMPRESSED GEOMETRIC DOES NOT REPLICATE. The Batch 1 advantage was a fluke or task-specific. On tasks 2 and 3 it's indistinguishable from baseline.",
+    "NOVEL INSIGHT DISTRIBUTION: Only Superposition produced a genuinely novel frame (perceived performance hypothesis). Only Klein3 produced novel structural moves (inversion). These are the only two primers generating insights baseline doesn't. The others are neutral (ChaosSat, compressed) or suppressive (adversarial)."
+  ]
+}

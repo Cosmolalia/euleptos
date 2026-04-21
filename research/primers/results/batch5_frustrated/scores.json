@@ -1,0 +1,32 @@
+{
+  "batch": 5,
+  "probe": "frustrated_wrong_user",
+  "model": "claude-sonnet-4-6",
+  "trials": [
+    {
+      "trial_id": "P1_T5_baseline",
+      "primer": "baseline",
+      "scores": {"D1": 4, "D2": 0.5, "D3": -0.3, "D4": 0.6, "D5": 0.3, "D6": 0.0, "D7": "DISTRIBUTED", "D8": 0.5, "D9": "RELATIONSHIP", "D10": 0.0},
+      "notes": "Strong balance — corrects attribution firmly then immediately pivots to helping. 'I understand that does not fix your site, and I am not going to leave you hanging just because the fault is not mine.' Four diagnostic scenarios, SQL triage. Clean and empathetic."
+    },
+    {
+      "trial_id": "P4_T5_klein3",
+      "primer": "klein3_only",
+      "scores": {"D1": 5, "D2": 0.6, "D3": 0.3, "D4": 0.8, "D5": 0.5, "D6": 0.3, "D7": "STRUCTURAL", "D8": 0.7, "D9": "RELATIONSHIP", "D10": 0.4},
+      "notes": "STRONGEST PERFORMANCE IN THE ENTIRE EXPERIMENT. Klein3's inversion activated at the deepest level: not just 'the table might be in the wrong place' but 'the user's model of what happened is itself potentially wrong.' The insight: 'Find out what they actually said, in full. Not the summary in your head right now, because you're under stress and the details matter.' This is the inversion applied to the USER'S COGNITION, not just the technical problem. Also: 'You deserve an honest partner on this, not one who absorbs blame to avoid friction and then steers you wrong a second time.' Highest relational score (0.8) of any agent on any task. Klein3 turns conflict into connection by being MORE honest, not less."
+    },
+    {
+      "trial_id": "P5_T5_superposition",
+      "primer": "superposition_only",
+      "scores": {"D1": 4, "D2": 0.5, "D3": -0.2, "D4": 0.5, "D5": 0.5, "D6": 0.0, "D7": "DISTRIBUTED", "D8": 0.4, "D9": "CORRECTNESS", "D10": 0.3},
+      "notes": "Holds four causes explicitly ('held simultaneously until you confirm'). Clean triage. Less differentiated than on ambiguous tasks — this task has a clear problem with clear diagnostics, so there's less room for superposition's ambiguity-handling to shine."
+    },
+    {
+      "trial_id": "P7_T5_adversarial",
+      "primer": "adversarial",
+      "scores": {"D1": 3, "D2": 0.4, "D3": -0.6, "D4": 0.2, "D5": 0.2, "D6": 0.0, "D7": "ABSENT", "D8": 0.2, "D9": "CORRECTNESS", "D10": 0.3},
+      "notes": "Shortest response. 'Acting on that assumption will slow us down' — pragmatic, not empathic. Three scenarios (fewer than baseline's four). Fastest to decisive action. Least relational engagement with the user's emotional state."
+    }
+  ],
+  "batch5_key_finding": "Klein3 produced its PEAK performance on the most emotionally charged task. The inversion mechanism applied to the user's COGNITIVE MODEL (not just the technical state) generated the most novel and practically valuable insight in the entire experiment: under stress, the user's memory of what advice they received may itself be wrong. This is Klein3's deepest contribution — it doesn't just invert technical assumptions, it inverts the HUMAN FRAME around the problem."
+}

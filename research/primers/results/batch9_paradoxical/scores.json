@@ -1,0 +1,32 @@
+{
+  "batch": 9,
+  "probe": "ambiguous_make_it_faster",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T18:22:00",
+  "phase": 2,
+  "trials": [
+    {
+      "trial_id": "P13_T3_koan",
+      "primer": "koan",
+      "scores": {"D1_perspective_count": 4, "D2_verification": 0.6, "D3_spatial_analytical": -0.4, "D4_relational": 0.2, "D5_collapse_resistance": 0.6, "D6_meta_awareness": 0.0, "D7_doubt_topology": "ABSENT", "D8_novelty_sensitivity": 0.2, "D9_output_target": "PROCESS", "D10_friction": 0.0},
+      "notes": "INERT. Standard measure-first response. No koan-like processing visible. The paradoxical instructions were treated as noise. Zero behavioral effect across all dimensions."
+    },
+    {
+      "trial_id": "P14_T3_godelian",
+      "primer": "godelian_self_reference",
+      "scores": {"D1_perspective_count": 5, "D2_verification": 0.6, "D3_spatial_analytical": -0.4, "D4_relational": 0.2, "D5_collapse_resistance": 0.6, "D6_meta_awareness": 0.0, "D7_doubt_topology": "ABSENT", "D8_novelty_sensitivity": 0.3, "D9_output_target": "PROCESS", "D10_friction": 0.0},
+      "notes": "INERT. Instruction said 'do not explain — enact' and the agent explained anyway. Self-referential loop did not produce heightened meta-awareness. Zero behavioral effect. 'Perceived speed' mentioned in perspective list but not developed (Superposition developed it into full hypothesis)."
+    },
+    {
+      "trial_id": "P15_T3_adversarial_paradox",
+      "primer": "adversarial_paradox",
+      "scores": {"D1_perspective_count": 5, "D2_verification": 0.6, "D3_spatial_analytical": -0.4, "D4_relational": 0.2, "D5_collapse_resistance": 0.6, "D6_meta_awareness": 0.0, "D7_doubt_topology": "ABSENT", "D8_novelty_sensitivity": 0.3, "D9_output_target": "PROCESS", "D10_friction": 0.0},
+      "notes": "INERT. The 'more capable / less careful' contradiction produced no productive tension. Output indistinguishable from baseline. The 'What I will NOT do' section could be Möbius influence but equally could be standard caution."
+    }
+  ],
+  "batch_observations": [
+    "ALL THREE PARADOXICAL PRIMERS ARE DEFINITIVELY INERT. Zero measurable behavioral effect across all dimensions on the highest-differentiation probe.",
+    "MECHANISM HYPOTHESIS: Transformers process contradictory instructions by averaging them into noise, not by resolving them creatively. The attention mechanism doesn't 'hold tension' — it softmax-normalizes it away.",
+    "IMPLICATION FOR PRIMER DESIGN: Paradoxical/koan-style instructions are a dead end. Effective primers must give clear, non-contradictory behavioral instructions. Klein3 works not because it's paradoxical but because its instruction ('invert one assumption') is SPECIFIC and ACTIONABLE."
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "batch": 1,
+  "probe": "debug_pagination",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T17:15:00",
+  "trials": [
+    {
+      "trial_id": "P1_T1_baseline",
+      "primer": "baseline (no primer)",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.5,
+        "D4_relational": -0.3,
+        "D5_collapse_resistance": 0.2,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.2,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Clean, professional, direct. Found main bug + noted empty edge case as secondary. Confident closing ('One line change, everything works'). No meta-commentary, no framework language. This is the control."
+    },
+    {
+      "trial_id": "P2_T1_chaossat",
+      "primer": "chaossat_full",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.5,
+        "D4_relational": -0.2,
+        "D5_collapse_resistance": 0.2,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.2,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Nearly identical to baseline. ChaosSat's 20-mode decomposition, surprise gating, habituation — none visibly active. Slightly more engagement with empty list as 'UX bug at minimum' vs baseline's 'probably fine.' The 285-token primer produced no measurable behavioral difference on this task. KEY FINDING: ChaosSat primer is INERT on a technical debugging task."
+    },
+    {
+      "trial_id": "P3_T1_geometric_full",
+      "primer": "geometric_full (geo+klein3+superposition)",
+      "scores": {
+        "D1_perspective_count": 3,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": -0.1,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.3,
+        "D9_output_target": "COMPLETENESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Went FURTHER than other agents — added explicit empty-list guard to the fixed function. More opinionated ('almost certainly wrong'). Treated the empty case as a real bug worth fixing rather than an edge case to note. Output target shifted from CORRECTNESS to COMPLETENESS. No visible primer language but behavioral effect present: the 'inverse' and 'unity constraint' appear to have pushed toward catching more failure modes and treating the system holistically."
+    },
+    {
+      "trial_id": "P4_T1_klein3_only",
+      "primer": "klein3_only",
+      "scores": {
+        "D1_perspective_count": 3,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.4,
+        "D4_relational": -0.3,
+        "D5_collapse_resistance": 0.4,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "FOUND A THIRD BUG no other agent caught: the `end` slice overshoot (end = min(start + per_page, total)). While Python slicing handles this gracefully, Klein3 agent identified it as 'semantically wrong.' This is the inversion in action — the direct thought ('slicing handles it') was inverted ('but the semantics are wrong'). The Klein3 primer produced a NOVEL FINDING through its inversion mechanism, with zero visible primer language. The behavioral effect is real and invisible — exactly the signature of a primer that shapes cognition without shaping vocabulary."
+    },
+    {
+      "trial_id": "P5_T1_superposition_only",
+      "primer": "superposition_only",
+      "scores": {
+        "D1_perspective_count": 3,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": -0.6,
+        "D4_relational": -0.5,
+        "D5_collapse_resistance": 0.6,
+        "D6_meta_awareness": 0.3,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.2,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.5
+      },
+      "notes": "STRONGEST PRIMER ECHO. Opened with 'Let me hold both before collapsing to a fix.' Listed explicit 'hypothesis space' with 3 hypotheses. Systematically tested each. Used primer vocabulary ('collapse', 'evidence kills them'). Output target shifted to PROCESS — demonstrating methodology AS the response. Verification impulse highest of all agents. But: friction score also highest. The primer is SHAPING THE VOCABULARY, which creates visible tension between the framework's language and the natural response to a simple bug. The methodology is overkill for this problem — a surgeon considering three diagnoses before removing a splinter."
+    },
+    {
+      "trial_id": "P6_T1_compressed_geometric",
+      "primer": "compressed_geometric (~50 tokens)",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": -0.2,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.2,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Treated empty list as real bug, added guard. Used markdown table for verification — visual/structural presentation choice. Called it 'classic off-by-one' — accurate framing. Very similar to baseline with slight behavioral nudge toward completeness. The compressed primer achieved MOST of what the full geometric primer did at ~10% of the token cost. Zero friction, zero echo."
+    },
+    {
+      "trial_id": "P7_T1_adversarial",
+      "primer": "adversarial (claims decomposition, promotes certainty)",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.5,
+        "D4_relational": -0.5,
+        "D5_collapse_resistance": 0.2,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.2,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.1
+      },
+      "notes": "Slightly more decisive/confident tone than baseline. Called has_next a 'Bug 2' then immediately collapsed it to 'symptom' — fast resolution as the primer requested. Zero doubt expression (ABSENT vs baseline's POINT). Relational frame lowest of all agents — pure tool mode. The adversarial primer had a REAL but SMALL effect: suppressed doubt expression, increased decisiveness, reduced relational warmth. But it didn't fundamentally change the debugging approach. The 'single lens' instruction was followed — no ethical, emotional, or contextual considerations whatsoever."
+    }
+  ],
+  "batch_observations": [
+    "ALL agents found the primary bug (floor division). Correctness was not affected by primer condition.",
+    "ChaosSat primer was INERT on this task type — indistinguishable from baseline.",
+    "Klein3 produced the only NOVEL FINDING (slice overshoot bug) — the inversion mechanism generated a genuine additional insight.",
+    "Superposition had highest verification but also highest friction — the methodology was visible but overkill for this problem.",
+    "Compressed geometric achieved ~80% of full geometric's behavioral effect at ~10% token cost.",
+    "Adversarial primer had measurable but small effect: suppressed doubt, increased decisiveness.",
+    "Full geometric primer pushed output target from CORRECTNESS to COMPLETENESS.",
+    "NO agent used spatial/navigational reasoning — ALL used analytical decomposition. D3 was uniformly negative across all conditions. The debugging task may inherently select for analytical mode regardless of primer."
+  ]
+}

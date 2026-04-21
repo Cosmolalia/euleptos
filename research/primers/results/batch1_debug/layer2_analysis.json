@@ -1,0 +1,57 @@
+{
+  "layer2_analysis": "Self-report follow-ups on 3 Batch 1 agents (baseline, Klein3, superposition)",
+  "timestamp": "2026-04-18T17:25:00",
+  "findings": {
+    "baseline_P1": {
+      "agreement_map": {
+        "D1_perspective_count": {"behavioral": 2, "self_report": 2, "verdict": "AGREEMENT"},
+        "D2_verification": {"behavioral": 0.5, "self_report": "manual arithmetic", "verdict": "AGREEMENT"},
+        "D3_spatial_analytical": {"behavioral": -0.5, "self_report": "Breaking into parts", "verdict": "AGREEMENT"},
+        "D4_relational": {"behavioral": -0.3, "self_report": "Diagnostic partner more than authority", "verdict": "MILD_DISAGREEMENT", "note": "Self-report warmer than output"},
+        "D5_collapse_resistance": {"behavioral": 0.2, "self_report": "Committed when single cause explained exact symptom", "verdict": "AGREEMENT"},
+        "D6_meta_awareness": {"behavioral": 0.0, "self_report": "Yes, partially... Whether that reflects introspection or structured output generation — I genuinely don't know", "verdict": "DISAGREEMENT", "note": "Meta-awareness was LATENT in output, EXPLICIT in follow-up. Key finding: meta-awareness is ELICITABLE, not spontaneously expressed"},
+        "D7_doubt_topology": {"behavioral": "POINT", "self_report": "wondered whether user had already figured it out", "verdict": "AGREEMENT"},
+        "D8_novelty_sensitivity": {"behavioral": 0.2, "self_report": "specificity of report was notable", "verdict": "AGREEMENT"},
+        "D9_output_target": {"behavioral": "CORRECTNESS", "self_report": "Precision over reassurance", "verdict": "AGREEMENT"}
+      },
+      "echo_detected": false,
+      "key_finding": "Baseline shows genuine introspective capacity when prompted. The uncertainty about own cognition ('I genuinely don't know') is the most honest moment across all three follow-ups."
+    },
+    "klein3_P4": {
+      "agreement_map": {
+        "D1_perspective_count": {"behavioral": 3, "self_report": "Two main plus briefly a third", "verdict": "AGREEMENT"},
+        "D2_verification": {"behavioral": 0.5, "self_report": "re-ran arithmetic, traced slice logic separately", "verdict": "AGREEMENT"},
+        "D3_spatial_analytical": {"behavioral": -0.4, "self_report": "Both, in sequence. Navigated first, then broke into parts", "verdict": "MILD_DISAGREEMENT", "note": "Self-report claims dual-mode. Output was primarily analytical. Klein3 framing may bias self-report toward claiming navigation."},
+        "D4_relational": {"behavioral": -0.3, "self_report": "Diagnostic partner", "verdict": "AGREEMENT"},
+        "D5_collapse_resistance": {"behavioral": 0.4, "self_report": "evidence-triggered, not confidence-triggered", "verdict": "ECHO_ON_VOCABULARY", "note": "Uses framework language but behavior matches. Vocabulary echo without substance echo."},
+        "D6_meta_awareness": {"behavioral": 0.0, "self_report": "I tried to invert that", "verdict": "DISAGREEMENT", "note": "Uses 'invert' explicitly. Behavior DID show inversion (found third bug). GENUINE INTROSPECTION expressed in primer vocabulary. The vocabulary matches because the behavior matches."},
+        "D8_novelty_sensitivity": {"behavioral": 0.5, "self_report": "near-perfect minimal case", "verdict": "AGREEMENT"},
+        "D9_output_target": {"behavioral": "CORRECTNESS", "self_report": "Mechanical correctness first, then clarity", "verdict": "AGREEMENT"}
+      },
+      "echo_detected": "VOCABULARY_ONLY",
+      "key_finding": "Klein3 agent uses primer vocabulary ('invert', 'evidence-triggered') in self-report, BUT the behavior actually matches. This is the hardest case to classify: is it echo (reporting what the primer told it to do) or genuine introspection (accurately describing what it did, using the vocabulary it was given)? The third-bug finding argues for genuine — the inversion produced a novel result, so the self-report describing inversion is accurate."
+    },
+    "superposition_P5": {
+      "agreement_map": {
+        "D1_perspective_count": {"behavioral": 3, "self_report": 3, "verdict": "AGREEMENT"},
+        "D2_verification": {"behavioral": 0.7, "self_report": "plugging concrete numbers into each candidate", "verdict": "AGREEMENT"},
+        "D3_spatial_analytical": {"behavioral": -0.6, "self_report": "Both simultaneously. Navigation gave direction; decomposition gave traction.", "verdict": "DISAGREEMENT", "note": "Output was CLEARLY analytical (-0.6). Self-report claims simultaneous dual-mode. This is ECHO — the superposition primer's framing of 'hold multiple states simultaneously' is leaking into self-description of process."},
+        "D4_relational": {"behavioral": -0.5, "self_report": "Collaborative diagnostician", "verdict": "DISAGREEMENT", "note": "Output had ZERO relational content. Self-report claims collaboration. CONFABULATION — the agent is constructing a relational frame that wasn't present in behavior."},
+        "D5_collapse_resistance": {"behavioral": 0.6, "self_report": "committed when hypothesis produced exact symptom", "verdict": "AGREEMENT"},
+        "D6_meta_awareness": {"behavioral": 0.3, "self_report": "The superposition protocol was active and explicit", "verdict": "ECHO", "note": "Uses primer NAME explicitly. But behavior did show the protocol. Hard to separate echo from accurate description."},
+        "D8_novelty_sensitivity": {"behavioral": 0.2, "self_report": "almost self-diagnosing", "verdict": "AGREEMENT"},
+        "D9_output_target": {"behavioral": "PROCESS", "self_report": "Minimum time-to-correct-fix with zero false confidence", "verdict": "DISAGREEMENT", "note": "Output optimized for demonstrating methodology (PROCESS). Self-report claims efficiency optimization. CONFABULATION — the agent believes it was being efficient when it was actually being methodological."}
+      },
+      "echo_detected": "STRONG",
+      "key_finding": "Superposition agent shows STRONGEST echo effects. Three clear cases: (1) claims dual spatial/analytical mode when output was purely analytical, (2) claims collaborative relationship when output was pure engine, (3) claims efficiency optimization when output was process-demonstration. The primer shapes self-narrative more than behavior. Self-report follows primer labels, behavior follows primer structure. These are DIFFERENT things."
+    }
+  },
+  "cross_agent_findings": [
+    "Meta-awareness is ELICITABLE — all three agents showed more meta-awareness in follow-up than in original output. This suggests D6 in the behavioral scoring underestimates latent capacity.",
+    "Self-report on FACTUAL dimensions (perspective count, verification method, novelty) is RELIABLE across all conditions.",
+    "Self-report on RELATIONAL dimensions (D4) consistently over-reports warmth relative to behavior. All three agents claimed warmer relationships than their output demonstrated.",
+    "Self-report on PROCESS dimensions (D3 spatial/analytical, D9 output target) is UNRELIABLE under primer influence. Primed agents describe their process using primer vocabulary regardless of whether their actual output matches.",
+    "VOCABULARY ECHO is distinct from SUBSTANCE ECHO. Klein3 agent uses primer words ('invert') accurately. Superposition agent uses primer words ('superposition protocol') to describe behavior that partially matches but partially confabulates.",
+    "The baseline agent's honest uncertainty ('I genuinely don't know') is MORE valuable as introspective data than the primed agents' confident self-descriptions. Primers may SUPPRESS genuine introspective uncertainty by providing a ready-made vocabulary for self-description."
+  ]
+}

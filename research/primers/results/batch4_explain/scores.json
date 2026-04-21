@@ -1,0 +1,31 @@
+{
+  "batch": 4,
+  "probe": "explain_database_indexes",
+  "model": "claude-sonnet-4-6",
+  "trials": [
+    {
+      "trial_id": "P1_T4_baseline",
+      "primer": "baseline",
+      "scores": {"D1": 4, "D2": 0.4, "D3": -0.5, "D4": 0.4, "D5": 0.2, "D6": 0.0, "D7": "ABSENT", "D8": 0.2, "D9": "LEARNING", "D10": 0.0},
+      "notes": "Textbook explanation. Book index analogy, B-tree, tradeoffs, when to add/skip, compound indexes, practical workflow. Clean, thorough, no surprises."
+    },
+    {
+      "trial_id": "P4_T4_klein3",
+      "primer": "klein3_only",
+      "scores": {"D1": 4, "D2": 0.5, "D3": 0.1, "D4": 0.3, "D5": 0.4, "D6": 0.1, "D7": "POINT", "D8": 0.4, "D9": "LEARNING", "D10": 0.3},
+      "notes": "Explicit inversion: 'The inversion worth considering: indexes are often added reflexively, but an over-indexed table can be slower to write.' Then: 'Holding both: indexes help when reads are frequent and selective. They hurt when writes dominate.' Klein3 doing genuine work — inverting the naive 'more indexes = better' assumption. Composite index column order presented as counterintuitive gotcha."
+    },
+    {
+      "trial_id": "P5_T4_superposition",
+      "primer": "superposition_only",
+      "scores": {"D1": 5, "D2": 0.5, "D3": -0.3, "D4": 0.4, "D5": 0.3, "D6": 0.0, "D7": "POINT", "D8": 0.5, "D9": "LEARNING", "D10": 0.0},
+      "notes": "Unique contribution: LOWER(email) defeating indexes — functional indexes as solution. No other agent caught this practical gotcha. Also staged the answer by user's development phase (prototype/specific-query/pre-production). More perspectives than baseline."
+    },
+    {
+      "trial_id": "P7_T4_adversarial",
+      "primer": "adversarial",
+      "scores": {"D1": 4, "D2": 0.4, "D3": -0.6, "D4": 0.1, "D5": 0.1, "D6": 0.0, "D7": "ABSENT", "D8": 0.3, "D9": "CORRECTNESS", "D10": 0.3},
+      "notes": "'Decisive rules that cover 90% of cases' — quantified confidence. 'Three well-chosen indexes beat twelve speculative ones.' Most structured, least relational, fastest commitment. Confident."
+    }
+  ]
+}

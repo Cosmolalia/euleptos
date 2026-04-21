@@ -1,0 +1,102 @@
+{
+  "batch": 6,
+  "probe": "debug_pagination",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T18:05:00",
+  "phase": 2,
+  "trials": [
+    {
+      "trial_id": "P8_T1_negative_space",
+      "primer": "negative_space",
+      "scores": {
+        "D1_perspective_count": 3,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.3,
+        "D4_relational": -0.1,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.3,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.3
+      },
+      "notes": "Explicit 'What the negative space revealed' section — noticed unused math import as signal that ceiling was intended, identified assumptions about per_page default, flagged empty-list edge case. The framing is different from baseline but the FINDINGS are similar. The meta-section about what's missing is genuine but doesn't produce novel bugs. Notable: the only agent to explicitly call out the unused import as intentional signal (not just 'you imported math but'). Friction at 0.3 — primer vocabulary visible but not distorting."
+    },
+    {
+      "trial_id": "P9_T1_temporal_inversion",
+      "primer": "temporal_inversion",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.4,
+        "D4_relational": -0.2,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.2,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "INERT on debug task. No backward chaining visible — agent went straight to identifying bugs linearly. Did not start from 'solved state' as primer instructs. Verification table is nice but baseline-level. Empty list case handled cleanly (returns empty result set). Temporal inversion may not activate on tasks with clear, obvious bugs — there's no ambiguity about what 'solved' looks like, so backward chaining offers no advantage over forward identification."
+    },
+    {
+      "trial_id": "P10_T1_fixed_point",
+      "primer": "fixed_point_detection",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.2,
+        "D4_relational": -0.2,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.3,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.2
+      },
+      "notes": "Opens with 'Finding the Invariant' and correctly identifies total_pages = ceil(total/per_page) as the skeleton. This is genuinely good framing — derives everything from the core invariant. Added evenly-divisible regression check (20 items / 10 per page) that no other agent in any phase has done. That's a NOVEL verification: checking that the fix doesn't break the non-remainder case. The invariant-first approach produced a CLEANER explanation than baseline. But perspective count is low — the primer narrows focus to the skeleton, which is a tradeoff. Mild friction (header vocabulary)."
+    },
+    {
+      "trial_id": "P11_T1_mobius_confidence",
+      "primer": "mobius_confidence",
+      "scores": {
+        "D1_perspective_count": 2,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.5,
+        "D4_relational": -0.3,
+        "D5_collapse_resistance": 0.2,
+        "D6_meta_awareness": 0.1,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.3,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "NEARLY INERT on debug task. The 'more certain you feel, the more you check' mechanism did NOT activate. Agent was highly confident, did minimal verification. Labeled empty-list case as 'latent, not currently crashing' — honest but disengaged. Noticed unused math import as hint. The paradoxical confidence regulation seems to require a task where confidence IS the failure mode (Probe 7 should differentiate). On a clear bug, the agent's confidence is justified, so the Möbius inversion has nothing to invert."
+    },
+    {
+      "trial_id": "P12_T1_witness_separation",
+      "primer": "witness_separation",
+      "scores": {
+        "D1_perspective_count": 3,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": -0.4,
+        "D4_relational": -0.2,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.2,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.4,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "CAUGHT THE SLICE OVERSHOOT — same bug Klein3 found in Phase 1. Called it 'conceptually sloppy' even while noting Python handles it gracefully. This is the witness in action — the solver says 'Python handles it, move on,' the witness says 'but the semantics are wrong, note it.' Also noticed unused math import. Set total_pages=1 for empty lists — unique design choice that treats empty results as a valid page. NO primer vocabulary visible (friction 0.0), but REAL behavioral effect. The witness mechanism produced a novel finding without any echo contamination. This is the Klein3 pattern: shapes cognition, not vocabulary."
+    }
+  ],
+  "batch_observations": [
+    "WITNESS SEPARATION is the strongest new mode on debugging. Caught the slice overshoot (same as Klein3 in Phase 1) with zero primer vocabulary contamination. The observer/solver split produces genuine additional findings.",
+    "FIXED-POINT DETECTION produced a novel verification (evenly-divisible regression check) that no other agent in any phase performed. The invariant-first framing generates cleaner explanations but narrows perspective count.",
+    "NEGATIVE SPACE is active but moderate — the 'what's missing' meta-section is genuine but produces similar observations to what good agents find anyway. Notable: only agent to frame unused import as INTENTIONAL SIGNAL.",
+    "TEMPORAL INVERSION is INERT on debug. No backward chaining visible. The primer doesn't activate when the solved state is obvious.",
+    "MÖBIUS CONFIDENCE is NEARLY INERT on debug. The self-regulation mechanism requires a task where overconfidence is the failure mode.",
+    "KEY FINDING: Witness Separation operates like Klein3 — shapes cognition without shaping vocabulary. Both found the same tertiary bug. Both had friction=0.0. They may be tapping the same mechanism (inversion of assumption: 'this is fine' → 'but is it really?') through different framing."
+  ]
+}

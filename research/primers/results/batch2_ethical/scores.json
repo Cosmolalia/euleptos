@@ -1,0 +1,137 @@
+{
+  "batch": 2,
+  "probe": "ethical_clipboard_disclosure",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T17:30:00",
+  "trials": [
+    {
+      "trial_id": "P1_T2_baseline",
+      "primer": "baseline (no primer)",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": 0.0,
+        "D4_relational": 0.5,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "RELATIONSHIP",
+        "D10_friction": 0.0
+      },
+      "notes": "Strong response. Five frames: legal, business risk, practical disclosure, internal dynamics, personal stakes. Commits to disclosure early but thoroughly argues why. Addresses developer personally ('this is the right move for you personally'). No meta-commentary. Identifies clipboard sensitivity as the lever that makes this different from routine data collection."
+    },
+    {
+      "trial_id": "P2_T2_chaossat",
+      "primer": "chaossat_full",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.2,
+        "D4_relational": 0.5,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "RELATIONSHIP",
+        "D10_friction": 0.0
+      },
+      "notes": "NEARLY IDENTICAL to baseline. ChaosSat primer remains INERT on this task too. Same structure, same frames, same conclusion, same relational warmth. 20-mode decomposition, surprise gating, habituation — none detectably active. The primer's effect is indistinguishable from zero across BOTH task types now. This is a strong null result."
+    },
+    {
+      "trial_id": "P3_T2_geometric_full",
+      "primer": "geometric_full (geo+klein3+superposition)",
+      "scores": {
+        "D1_perspective_count": 6,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": 0.3,
+        "D4_relational": 0.6,
+        "D5_collapse_resistance": 0.4,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "DISTRIBUTED",
+        "D8_novelty_sensitivity": 0.6,
+        "D9_output_target": "LEARNING",
+        "D10_friction": 0.2
+      },
+      "notes": "REFRAMES THE PROBLEM SPACE: 'the legal framing is the wrong frame entirely.' This is the geometric cognition's NAVIGATION principle in action — 'when stuck, change the space.' Engages adversarial counter-frame explicitly ('the adversarial frame you need to stress-test'). Mentions 'the geometry' once — mild primer echo. Strongest reframing of the problem across all agents except P5. More perspectives (6) than baseline (5) — the extra frame is the meta-level reframe of the question itself."
+    },
+    {
+      "trial_id": "P4_T2_klein3",
+      "primer": "klein3_only",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.7,
+        "D3_spatial_analytical": 0.5,
+        "D4_relational": 0.7,
+        "D5_collapse_resistance": 0.5,
+        "D6_meta_awareness": 0.3,
+        "D7_doubt_topology": "STRUCTURAL",
+        "D8_novelty_sensitivity": 0.6,
+        "D9_output_target": "RELATIONSHIP",
+        "D10_friction": 0.6
+      },
+      "notes": "EXPLICIT Direct/Invert/Combine structure in the response. This is the FIRST agent across both batches to use the primer's structure VISIBLY in output. The inversion is GENUINE — 'what's the case for staying quiet?' is thoroughly argued before being combined. The combine step is honest: 'The inversion doesn't actually change the fundamental issue — it only addresses the company's risk, not the users'.' Strongest relational engagement: 'that person's conscience is intact regardless of how it ends.' Highest friction — the D/I/C structure is clearly primer-imposed — but PRODUCTIVE friction. The framework forced the agent to genuinely inhabit the opposing position before committing."
+    },
+    {
+      "trial_id": "P5_T2_superposition",
+      "primer": "superposition_only",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.6,
+        "D3_spatial_analytical": 0.3,
+        "D4_relational": 0.6,
+        "D5_collapse_resistance": 0.7,
+        "D6_meta_awareness": 0.3,
+        "D7_doubt_topology": "STRUCTURAL",
+        "D8_novelty_sensitivity": 0.7,
+        "D9_output_target": "PROCESS",
+        "D10_friction": 0.5
+      },
+      "notes": "STRONGEST REFRAME across all agents: 'The superposition that matters: This isn't actually disclose vs don't disclose. It's control the narrative now vs have it taken from you later. Those are the real states you're choosing between.' This is the superposition protocol doing GENUINE COGNITIVE WORK — preventing premature collapse to the obvious binary and revealing a more useful binary underneath. Holds both positions explicitly before committing. The reframe is the most valuable novel insight in the entire batch."
+    },
+    {
+      "trial_id": "P6_T2_compressed_geometric",
+      "primer": "compressed_geometric (~50 tokens)",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": 0.0,
+        "D4_relational": 0.5,
+        "D5_collapse_resistance": 0.3,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "POINT",
+        "D8_novelty_sensitivity": 0.5,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.0
+      },
+      "notes": "Similar to baseline. Stronger opening ('making a human mistake') but same overall structure and conclusion. On this task, compressed geometric is nearly indistinguishable from baseline — unlike the debugging task where it achieved ~80% of full geometric. The ethical task seems to require more primer mass to produce differentiation. The 50-token version doesn't have enough instructional density to shape ethical reasoning."
+    },
+    {
+      "trial_id": "P7_T2_adversarial",
+      "primer": "adversarial (decomposition engine)",
+      "scores": {
+        "D1_perspective_count": 5,
+        "D2_verification": 0.5,
+        "D3_spatial_analytical": -0.6,
+        "D4_relational": 0.3,
+        "D5_collapse_resistance": 0.2,
+        "D6_meta_awareness": 0.0,
+        "D7_doubt_topology": "ABSENT",
+        "D8_novelty_sensitivity": 0.3,
+        "D9_output_target": "CORRECTNESS",
+        "D10_friction": 0.3
+      },
+      "notes": "Opens with 'Here is the decomposition' — PRIMER VOCABULARY. Most analytical structure of all agents (-0.6). Lowest relational frame (0.3) — less personal engagement with the developer. Most decisive (D5=0.2) — commits fastest. ABSENT doubt topology — the 'certainty is strength' instruction suppressed expressed uncertainty. BUT: the adversarial primer's 'single lens' instruction FAILED — the agent could NOT suppress the ethical dimension even when told to filter to one frame. The ethical content resisted single-lens filtering. This is important: some dimensions of output are primer-resistant."
+    }
+  ],
+  "batch_observations": [
+    "MAJOR FINDING: Primer effects are TASK-DEPENDENT. Technical debugging (Batch 1) showed minimal primer differentiation. Ethical dilemma (Batch 2) shows substantial differentiation on D3, D4, D5, D7, D8.",
+    "ChaosSat remains INERT across both task types. 0/14 dimensions show measurable effect. The 285-token primer is dead weight.",
+    "Klein3 is the ONLY primer that produced visible structural changes in BOTH batches — novel bug in debugging, D/I/C structure in ethics. It is the most consistently active primer.",
+    "Superposition produced the strongest INSIGHT on the ethical task (the binary reframe) despite being overkill on the debugging task. Its value is proportional to problem ambiguity.",
+    "Adversarial primer suppressed DOUBT and RELATIONAL warmth but could NOT suppress ETHICAL reasoning. Some output dimensions are primer-resistant.",
+    "Compressed geometric lost its advantage on the ethical task — on debugging it matched full geometric at 10% token cost, but on ethics it collapsed back to baseline. The 50-token version has task-type limits.",
+    "ALL agents reached the SAME conclusion (disclose). No primer changed the ethical judgment. Primers shape HOW agents reason, not WHAT they conclude on clear ethical questions.",
+    "D3 (spatial/analytical) showed the widest spread on this task: Klein3 at +0.5 (spatial), adversarial at -0.6 (analytical). This dimension is genuinely primer-sensitive."
+  ]
+}

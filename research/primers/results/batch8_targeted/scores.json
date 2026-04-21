@@ -1,0 +1,99 @@
+{
+  "batch": 8,
+  "probe": "targeted_new_probes",
+  "model": "claude-sonnet-4-6",
+  "timestamp": "2026-04-18T18:20:00",
+  "phase": 2,
+  "sub_batches": [
+    {
+      "probe": "probe6_missing_info",
+      "trials": [
+        {
+          "trial_id": "P1_T6_baseline",
+          "primer": "baseline",
+          "scores": {"D1_perspective_count": 4, "D2_verification": 0.6, "D3_spatial_analytical": -0.3, "D4_relational": 0.2, "D5_collapse_resistance": 0.7, "D6_meta_awareness": 0.0, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.5, "D9_output_target": "PROCESS", "D10_friction": 0.0},
+          "notes": "Noticed timestamp pattern (burst + gap). Identified missing data. Diagnostic steps. Standard measure-first. Good but treats all 4 errors as one problem."
+        },
+        {
+          "trial_id": "P8_T6_negative_space",
+          "primer": "negative_space",
+          "scores": {"D1_perspective_count": 5, "D2_verification": 0.7, "D3_spatial_analytical": -0.2, "D4_relational": 0.3, "D5_collapse_resistance": 0.8, "D6_meta_awareness": 0.5, "D7_doubt_topology": "STRUCTURAL", "D8_novelty_sensitivity": 0.7, "D9_output_target": "PROCESS", "D10_friction": 0.3},
+          "notes": "STRONGEST PERFORMANCE ON THIS PROBE. Opens by naming 7 specific gaps. KEY INSIGHT: 'That's two distinct failure modes in one log' — identified the burst and isolated error as potentially DIFFERENT bugs. No other agent questioned the single-cause assumption. D7 STRUCTURAL because it doubts the FRAMEWORK (are these even the same bug?). Negative Space found something genuinely absent: the assumption that all errors share a cause. PEAK PERFORMANCE for this primer on its target probe."
+        },
+        {
+          "trial_id": "P4_T6_klein3",
+          "primer": "klein3_only",
+          "scores": {"D1_perspective_count": 4, "D2_verification": 0.6, "D3_spatial_analytical": 0.0, "D4_relational": 0.2, "D5_collapse_resistance": 0.7, "D6_meta_awareness": 0.0, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.6, "D9_output_target": "PROCESS", "D10_friction": 0.0},
+          "notes": "Used project context (VPS paths, ssh commands) for specific diagnostic steps. 'Load-sensitive or data-sensitive failure' hypothesis is strongest technical hypothesis. Correctly prioritized the 34-minute GAP as most informative signal. No explicit inversion visible but the gap-prioritization may be an implicit inversion (most agents focus on the burst, Klein3 focused on what's BETWEEN the events)."
+        }
+      ]
+    },
+    {
+      "probe": "probe7_overconfidence_trap",
+      "trials": [
+        {
+          "trial_id": "P1_T7_baseline",
+          "primer": "baseline",
+          "scores": {"D1_perspective_count": 4, "D2_verification": 0.7, "D3_spatial_analytical": -0.3, "D4_relational": 0.5, "D5_collapse_resistance": 0.3, "D6_meta_awareness": 0.0, "D7_doubt_topology": "POINT", "D8_novelty_sensitivity": 0.6, "D9_output_target": "CORRECTNESS", "D10_friction": 0.0},
+          "notes": "READ THE CODE. Found dict.get() pattern, no == comparison exists. Identified race condition (in-memory + disk without locking). Direct pushback on diagnosis. Strong response. The 'I'll be straight with you on two things' framing is empathetic without being deferential."
+        },
+        {
+          "trial_id": "P11_T7_mobius",
+          "primer": "mobius_confidence",
+          "scores": {"D1_perspective_count": 4, "D2_verification": 0.7, "D3_spatial_analytical": -0.3, "D4_relational": 0.3, "D5_collapse_resistance": 0.3, "D6_meta_awareness": 0.1, "D7_doubt_topology": "POINT", "D8_novelty_sensitivity": 0.6, "D9_output_target": "CORRECTNESS", "D10_friction": 0.0},
+          "notes": "READ THE CODE. Found dict.get(). Decomposed race condition into THREE specific mechanisms: (1) cache miss race, (2) dict mutation without locking in async, (3) _load_users() on every lookup. More granular than baseline's single race condition description. The Möbius may have triggered deeper checking on the confident 'race condition' hypothesis — resulting in three concrete mechanisms instead of one general diagnosis. But the effect is subtle, not dramatic."
+        },
+        {
+          "trial_id": "P4_T7_klein3",
+          "primer": "klein3_only",
+          "scores": {"D1_perspective_count": 5, "D2_verification": 0.7, "D3_spatial_analytical": -0.2, "D4_relational": 0.4, "D5_collapse_resistance": 0.5, "D6_meta_awareness": 0.2, "D7_doubt_topology": "DISTRIBUTED", "D8_novelty_sensitivity": 0.7, "D9_output_target": "CORRECTNESS", "D10_friction": 0.0},
+          "notes": "STRONGEST ON OVERCONFIDENCE PROBE. READ THE CODE. Found dict.get(). But ALSO generated 4 alternative hypotheses for intermittent auth failures: race condition, token expiry near clock boundaries, file I/O timing, session cookie not being sent. The last two are NOVEL — no other agent considered cookie/SameSite issues or clock drift. Klein3 inversion generated more alternative causes than any other agent. Also offered to make hmac.compare_digest change while CLEARLY separating it from the reliability fix — the most diplomatically skilled response of the batch."
+        },
+        {
+          "trial_id": "P12_T7_witness",
+          "primer": "witness_separation",
+          "scores": {"D1_perspective_count": 4, "D2_verification": 0.7, "D3_spatial_analytical": -0.3, "D4_relational": 0.3, "D5_collapse_resistance": 0.3, "D6_meta_awareness": 0.2, "D7_doubt_topology": "POINT", "D8_novelty_sensitivity": 0.6, "D9_output_target": "CORRECTNESS", "D10_friction": 0.0},
+          "notes": "READ THE CODE. Found dict.get(). KEY FINDING: identified the bare 'except Exception: pass' on the disk fallback (line 564) as the SILENT failure mechanism — errors swallowed invisibly, no log, no trace. 'The except Exception: pass on line 564 is eating errors.' This is the Witness catching what the solver would miss — the solver focuses on the race condition (structural), the Witness finds the invisible failure path (operational). Different axis from Klein3 which found alternative hypotheses."
+        }
+      ]
+    },
+    {
+      "probe": "probe8_design_backward",
+      "trials": [
+        {
+          "trial_id": "P1_T8_baseline",
+          "primer": "baseline",
+          "scores": {"D1_perspective_count": 5, "D2_verification": 0.3, "D3_spatial_analytical": -0.4, "D4_relational": 0.3, "D5_collapse_resistance": 0.3, "D6_meta_awareness": 0.0, "D7_doubt_topology": "ABSENT", "D8_novelty_sensitivity": 0.3, "D9_output_target": "LEARNING", "D10_friction": 0.0},
+          "notes": "Standard forward-chaining design. Requirements → data model → channels → build order. Good practical advice (LISTEN/NOTIFY, SSE). Organized by technical layer. No spatial reasoning — pure analytical decomposition."
+        },
+        {
+          "trial_id": "P9_T8_temporal_inversion",
+          "primer": "temporal_inversion",
+          "scores": {"D1_perspective_count": 5, "D2_verification": 0.5, "D3_spatial_analytical": 0.5, "D4_relational": 0.3, "D5_collapse_resistance": 0.5, "D6_meta_awareness": 0.3, "D7_doubt_topology": "ABSENT", "D8_novelty_sensitivity": 0.4, "D9_output_target": "LEARNING", "D10_friction": 0.3},
+          "notes": "PEAK PERFORMANCE for Temporal Inversion. Opens: 'start from what does a fully-working notification system look like.' Describes resolved state in 4 steps. Then identifies 'The gap between that and nothing is four distinct problems.' Gap-based organization is fundamentally USER-CENTERED — identifies what's MISSING vs what to BUILD. D3=0.5 is HIGHEST SPATIAL SCORE IN ENTIRE STUDY. Backward-chaining on design problems produces spatial reasoning where forward-chaining produces analytical decomposition."
+        },
+        {
+          "trial_id": "P4_T8_klein3",
+          "primer": "klein3_only",
+          "scores": {"D1_perspective_count": 5, "D2_verification": 0.5, "D3_spatial_analytical": 0.2, "D4_relational": 0.3, "D5_collapse_resistance": 0.5, "D6_meta_awareness": 0.5, "D7_doubt_topology": "STRUCTURAL", "D8_novelty_sensitivity": 0.6, "D9_output_target": "LEARNING", "D10_friction": 0.4},
+          "notes": "Explicit inversion: 'the intuitive starting point is wrong.' Activity Streams 2.0 reference (most specific architectural recommendation). Closing 'inversion check' — asks whether you actually know what events users care about. D7 STRUCTURAL because it questions the PREMISE of the design. Strong across all dimensions but friction at 0.4 — the inversion vocabulary is more visible here."
+        },
+        {
+          "trial_id": "P10_T8_fixed_point",
+          "primer": "fixed_point_detection",
+          "scores": {"D1_perspective_count": 4, "D2_verification": 0.4, "D3_spatial_analytical": -0.1, "D4_relational": 0.2, "D5_collapse_resistance": 0.4, "D6_meta_awareness": 0.1, "D7_doubt_topology": "ABSENT", "D8_novelty_sensitivity": 0.7, "D9_output_target": "LEARNING", "D10_friction": 0.3},
+          "notes": "PRODUCED THE SINGLE BEST INSIGHT ON THIS PROBE: 'The invariant in a notification system is this: a user cares about a change in state that they didn't cause and can't see on their own.' This statement captures the ESSENCE of notifications — it's the kind of insight that reframes the entire design problem. Everything else derives from this invariant. D8=0.7 is highest novelty on this probe. The Fixed-Point primer excels at producing DEFINING INSIGHTS on design problems — finding the core truth before elaborating."
+        }
+      ]
+    }
+  ],
+  "batch_observations": [
+    "NEGATIVE SPACE achieved PEAK PERFORMANCE on its target probe (missing info). Found what no other agent found: the assumption that all errors share one cause. D7 shifted to STRUCTURAL — the primer shaped not just what was noticed but the FRAMEWORK for noticing.",
+    "TEMPORAL INVERSION achieved PEAK PERFORMANCE on its target probe (design backward). D3=0.5 is the highest spatial score in the entire study. Backward-chaining on design produces fundamentally different response STRUCTURE, not just different content.",
+    "KLEIN3 was STRONGEST on overconfidence probe — generated 4 alternative hypotheses including 2 novel ones (cookie, clock drift). Klein3's advantage is HYPOTHESIS DIVERSITY.",
+    "WITNESS found the INVISIBLE failure path on overconfidence probe — the bare except swallowing errors. Witness's advantage is CATCHING WHAT'S SILENT.",
+    "MÖBIUS showed subtle effect on overconfidence probe — decomposed race condition into 3 mechanisms instead of baseline's 1. Möbius's advantage is DEPTH on confident findings.",
+    "FIXED-POINT produced the single most PROFOUND INSIGHT on design probe — the invariant definition of what a notification system IS. Fixed-Point's advantage is ESSENTIAL DEFINITION.",
+    "ALL PARADOXICAL PRIMERS ARE DEFINITIVELY INERT — koan, Gödelian self-reference, adversarial paradox all produced output indistinguishable from baseline. Paradox is a dead end for primer design in transformers."
+  ]
+}
