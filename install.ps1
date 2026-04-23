@@ -1,20 +1,23 @@
 # Euleptos one-shot installer (Windows / PowerShell)
 # Usage:
-#   irm https://euleptos.com/install.ps1 | iex
+#   irm https://euleptos.com/install.ps1 | iex                                   # minimal (Claude Code only)
+#   $env:EULEPTOS_WITH_OLLAMA=1; irm https://euleptos.com/install.ps1 | iex       # + install Ollama + pull a model
 #   .\install.ps1
 #
 # Environment overrides:
-#   $env:EULEPTOS_DIR       install location           (default: $HOME\euleptos)
-#   $env:EULEPTOS_MODEL     Ollama model to pull       (default: llama3.2:3b)
-#   $env:EULEPTOS_NO_OLLAMA 1=skip Ollama install
-#   $env:EULEPTOS_NO_PULL   1=skip pulling a model
-#   $env:EULEPTOS_YES       1=auto-yes to all prompts (also implied if non-interactive)
+#   $env:EULEPTOS_DIR          install location           (default: $HOME\euleptos)
+#   $env:EULEPTOS_MODEL        Ollama model to pull       (default: llama3.2:3b)
+#   $env:EULEPTOS_WITH_OLLAMA  1=install Ollama if missing + pull a model
+#   $env:EULEPTOS_NO_OLLAMA    1=skip Ollama entirely, don't even detect existing install
+#   $env:EULEPTOS_NO_PULL      1=skip pulling a model (only matters with EULEPTOS_WITH_OLLAMA=1)
+#   $env:EULEPTOS_YES          1=auto-yes to all prompts (also implied if non-interactive)
 
 $ErrorActionPreference = 'Stop'
 
 $InstallDir   = if ($env:EULEPTOS_DIR)   { $env:EULEPTOS_DIR }   else { Join-Path $HOME 'euleptos' }
 $ZipUrl       = if ($env:EULEPTOS_ZIP_URL) { $env:EULEPTOS_ZIP_URL } else { 'https://euleptos.com/dist/euleptos-latest.zip' }
 $DefaultModel = if ($env:EULEPTOS_MODEL) { $env:EULEPTOS_MODEL } else { 'llama3.2:3b' }
+$WithOllama   = ($env:EULEPTOS_WITH_OLLAMA -eq '1')
 
 # Auto-yes when non-interactive (irm | iex) or when EULEPTOS_YES=1
 $Interactive = $true
@@ -106,41 +109,43 @@ if ($claude) {
 }
 
 # --------------------------------------------------------- 5. Ollama
+# Default: only use Ollama if already installed. Never auto-install unless
+# user opts in with EULEPTOS_WITH_OLLAMA=1.
+# EULEPTOS_NO_OLLAMA=1 skips the phase entirely (no detection either).
 $ollamaAvailable = $false
-if ($env:EULEPTOS_NO_OLLAMA -ne '1') {
+if ($env:EULEPTOS_NO_OLLAMA -eq '1') {
+    Dim "Skipping Ollama (EULEPTOS_NO_OLLAMA=1)"
+} elseif (Get-Command ollama -ErrorAction SilentlyContinue) {
     Say "`n-> Checking Ollama (local model runner)"
-    $ollama = Get-Command ollama -ErrorAction SilentlyContinue
-    if ($ollama) {
-        Ok "Ollama already installed"
-        $ollamaAvailable = $true
-    } else {
-        Warn "Ollama not found"
-        if (AskYes "Install Ollama? (lets you run local models offline)") {
-            Dim "Downloading official Ollama installer..."
-            $ollamaInstaller = Join-Path $env:TEMP "OllamaSetup.exe"
-            try {
-                Invoke-WebRequest -Uri 'https://ollama.com/download/OllamaSetup.exe' -OutFile $ollamaInstaller -UseBasicParsing
-                Dim "Running installer (it may open a window — click through)..."
-                Start-Process -FilePath $ollamaInstaller -ArgumentList '/SILENT' -Wait
-                Remove-Item $ollamaInstaller -Force -ErrorAction SilentlyContinue
-                # Refresh PATH
-                $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
-                if (Get-Command ollama -ErrorAction SilentlyContinue) {
-                    Ok "Ollama installed"
-                    $ollamaAvailable = $true
-                } else {
-                    Warn "Ollama installer ran but command not found in PATH. Open a new terminal after this and Ollama should appear."
-                }
-            } catch {
-                Warn "Ollama install failed: $_"
-                Dim "Install manually: https://ollama.com/download/OllamaSetup.exe"
+    Ok "Ollama already installed"
+    $ollamaAvailable = $true
+} elseif ($WithOllama) {
+    Say "`n-> Installing Ollama (EULEPTOS_WITH_OLLAMA=1)"
+    if (AskYes "Install Ollama? (official installer from ollama.com)") {
+        Dim "Downloading official Ollama installer..."
+        $ollamaInstaller = Join-Path $env:TEMP "OllamaSetup.exe"
+        try {
+            Invoke-WebRequest -Uri 'https://ollama.com/download/OllamaSetup.exe' -OutFile $ollamaInstaller -UseBasicParsing
+            Dim "Running installer (it may open a window — click through)..."
+            Start-Process -FilePath $ollamaInstaller -ArgumentList '/SILENT' -Wait
+            Remove-Item $ollamaInstaller -Force -ErrorAction SilentlyContinue
+            # Refresh PATH
+            $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+            if (Get-Command ollama -ErrorAction SilentlyContinue) {
+                Ok "Ollama installed"
+                $ollamaAvailable = $true
+            } else {
+                Warn "Ollama installer ran but command not found in PATH. Open a new terminal after this and Ollama should appear."
             }
-        } else {
-            Dim "Skipped. Install later: https://ollama.com/download/OllamaSetup.exe"
+        } catch {
+            Warn "Ollama install failed: $_"
+            Dim "Install manually: https://ollama.com/download/OllamaSetup.exe"
         }
+    } else {
+        Dim "Skipped. Install later: https://ollama.com/download/OllamaSetup.exe"
     }
 } else {
-    Dim "Skipping Ollama (EULEPTOS_NO_OLLAMA=1)"
+    Dim "Ollama not installed (skipping — set `$env:EULEPTOS_WITH_OLLAMA=1 to install, or do it yourself later)"
 }
 
 # --------------------------------------------------------- 5. Verify Ollama serving
@@ -155,13 +160,17 @@ if ($ollamaAvailable) {
 }
 
 # --------------------------------------------------------- 6. Pull a model
-if ($ollamaAvailable -and ($env:EULEPTOS_NO_PULL -ne '1')) {
+# Only pull a baseline model when EULEPTOS_WITH_OLLAMA=1 AND no models exist.
+# Never silently pull 2GB on a user who just wanted the harness.
+if ($ollamaAvailable) {
     $existing = 0
     try {
         $tags = Invoke-RestMethod -Uri 'http://localhost:11434/api/tags' -TimeoutSec 5
         $existing = ($tags.models | Measure-Object).Count
     } catch {}
-    if ($existing -eq 0) {
+    if ($existing -ne 0) {
+        Ok "$existing Ollama model(s) already installed"
+    } elseif ($WithOllama -and ($env:EULEPTOS_NO_PULL -ne '1')) {
         Say "`n-> No local models yet"
         if (AskYes "Pull $DefaultModel (~2 GB, fast baseline)?") {
             & ollama pull $DefaultModel
@@ -175,7 +184,7 @@ if ($ollamaAvailable -and ($env:EULEPTOS_NO_PULL -ne '1')) {
             Dim "Model catalog: https://ollama.com/library"
         }
     } else {
-        Ok "$existing Ollama model(s) already installed"
+        Dim "No local Ollama models (pull one with: ollama pull llama3.2:3b)"
     }
 }
 

@@ -1,17 +1,32 @@
 #!/usr/bin/env bash
 # Euleptos one-shot installer (Linux / macOS)
 # Usage:
-#   curl -fsSL https://euleptos.com/install.sh | bash
-#   bash install.sh
+#   curl -fsSL https://euleptos.com/install.sh | bash                  # minimal (Claude Code only)
+#   curl -fsSL https://euleptos.com/install.sh | bash -s -- --ollama   # + install Ollama + pull a model
+#   bash install.sh --ollama
 #
 # Environment overrides:
-#   EULEPTOS_DIR       install location           (default: ~/euleptos)
-#   EULEPTOS_MODEL     Ollama model to pull       (default: llama3.2:3b)
-#   EULEPTOS_NO_OLLAMA 1=skip Ollama install
-#   EULEPTOS_NO_PULL   1=skip pulling a model
-#   EULEPTOS_YES       1=auto-yes to all prompts (also implied if non-interactive)
+#   EULEPTOS_DIR          install location           (default: ~/euleptos)
+#   EULEPTOS_MODEL        Ollama model to pull       (default: llama3.2:3b)
+#   EULEPTOS_WITH_OLLAMA  1=install Ollama if missing + pull a model (same as --ollama)
+#   EULEPTOS_NO_OLLAMA    1=skip Ollama entirely, don't even detect an existing install
+#   EULEPTOS_NO_PULL      1=skip pulling a model (only matters with --ollama)
+#   EULEPTOS_YES          1=auto-yes to all prompts (also implied if non-interactive)
 
 set -eu
+
+# Parse CLI flags (supports `bash -s -- --ollama` when piped from curl)
+WITH_OLLAMA=0
+[ "${EULEPTOS_WITH_OLLAMA:-}" = "1" ] && WITH_OLLAMA=1
+for arg in "$@"; do
+    case "$arg" in
+        --ollama)     WITH_OLLAMA=1 ;;
+        --no-ollama)  WITH_OLLAMA=0; EULEPTOS_NO_OLLAMA=1 ;;
+        -h|--help)
+            sed -n '2,14p' "$0" 2>/dev/null || true
+            exit 0 ;;
+    esac
+done
 
 INSTALL_DIR="${EULEPTOS_DIR:-$HOME/euleptos}"
 ZIP_URL="${EULEPTOS_ZIP_URL:-https://euleptos.com/dist/euleptos-latest.zip}"
@@ -122,28 +137,31 @@ else
 fi
 
 # ---------------------------------------------------------------- 6. Ollama
+# Default: only use Ollama if it's already on PATH. Never auto-install unless
+# the user opts in with --ollama / EULEPTOS_WITH_OLLAMA=1.
+# EULEPTOS_NO_OLLAMA=1 skips the entire phase (no detection, no wiring).
 OLLAMA_AVAILABLE=0
-if [ "${EULEPTOS_NO_OLLAMA:-}" != "1" ]; then
+if [ "${EULEPTOS_NO_OLLAMA:-}" = "1" ]; then
+    dim "Skipping Ollama (EULEPTOS_NO_OLLAMA=1)"
+elif command -v ollama >/dev/null 2>&1; then
     say "→ Checking Ollama (local model runner)"
-    if command -v ollama >/dev/null 2>&1; then
-        ok "Ollama already installed ($(ollama --version 2>/dev/null | head -1))"
-        OLLAMA_AVAILABLE=1
-    else
-        warn "Ollama not found"
-        if ask_yes "Install Ollama? (lets you run local models offline)"; then
-            dim "Running official Ollama installer..."
-            if curl -fsSL https://ollama.com/install.sh | sh; then
-                ok "Ollama installed"
-                OLLAMA_AVAILABLE=1
-            else
-                warn "Ollama install failed. You can install later: curl -fsSL https://ollama.com/install.sh | sh"
-            fi
+    ok "Ollama already installed ($(ollama --version 2>/dev/null | head -1))"
+    OLLAMA_AVAILABLE=1
+elif [ "$WITH_OLLAMA" = "1" ]; then
+    say "→ Installing Ollama (--ollama flag / EULEPTOS_WITH_OLLAMA=1)"
+    if ask_yes "Install Ollama? (official installer from ollama.com)"; then
+        dim "Running official Ollama installer..."
+        if curl -fsSL https://ollama.com/install.sh | sh; then
+            ok "Ollama installed"
+            OLLAMA_AVAILABLE=1
         else
-            dim "Skipped. Install later: curl -fsSL https://ollama.com/install.sh | sh"
+            warn "Ollama install failed. You can install later: curl -fsSL https://ollama.com/install.sh | sh"
         fi
+    else
+        dim "Skipped."
     fi
 else
-    dim "Skipping Ollama (EULEPTOS_NO_OLLAMA=1)"
+    dim "Ollama not installed (skipping — pass --ollama to install, or do it yourself later)"
 fi
 
 # ---------------------------------------------------------------- 6. Start Ollama if needed
@@ -181,11 +199,15 @@ if [ "$OLLAMA_AVAILABLE" = "1" ]; then
 fi
 
 # ---------------------------------------------------------------- 7. Pull a model
-if [ "$OLLAMA_AVAILABLE" = "1" ] && [ "${EULEPTOS_NO_PULL:-}" != "1" ]; then
+# Only pull a baseline model when --ollama is passed AND the user has none.
+# Never silently pull 2GB on a user who just wanted the harness.
+if [ "$OLLAMA_AVAILABLE" = "1" ]; then
     EXISTING=$(curl -fsS http://localhost:11434/api/tags 2>/dev/null \
         | python3 -c 'import json,sys; d=json.load(sys.stdin); print(len(d.get("models",[])))' 2>/dev/null \
         || echo 0)
-    if [ "$EXISTING" = "0" ]; then
+    if [ "$EXISTING" != "0" ]; then
+        ok "$EXISTING Ollama model(s) already installed"
+    elif [ "$WITH_OLLAMA" = "1" ] && [ "${EULEPTOS_NO_PULL:-}" != "1" ]; then
         say "→ No local models yet"
         if ask_yes "Pull $DEFAULT_MODEL (~2 GB, fast baseline)?"; then
             ollama pull "$DEFAULT_MODEL" || warn "Model pull failed (try manually: ollama pull $DEFAULT_MODEL)"
@@ -195,7 +217,7 @@ if [ "$OLLAMA_AVAILABLE" = "1" ] && [ "${EULEPTOS_NO_PULL:-}" != "1" ]; then
             dim "Model catalog: https://ollama.com/library"
         fi
     else
-        ok "$EXISTING Ollama model(s) already installed"
+        dim "No local Ollama models (pull one with: ollama pull llama3.2:3b)"
     fi
 fi
 
