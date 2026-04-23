@@ -23,7 +23,18 @@ for arg in "$@"; do
         --ollama)     WITH_OLLAMA=1 ;;
         --no-ollama)  WITH_OLLAMA=0; EULEPTOS_NO_OLLAMA=1 ;;
         -h|--help)
-            sed -n '2,14p' "$0" 2>/dev/null || true
+            cat <<'USAGE'
+Euleptos one-shot installer (Linux / macOS)
+
+Usage:
+  curl -fsSL https://euleptos.com/install.sh | bash                  # minimal (Claude Code only)
+  curl -fsSL https://euleptos.com/install.sh | bash -s -- --ollama   # + install Ollama + pull a model
+  bash install.sh [--ollama|--no-ollama]
+
+Env overrides:
+  EULEPTOS_DIR, EULEPTOS_MODEL, EULEPTOS_WITH_OLLAMA,
+  EULEPTOS_NO_OLLAMA, EULEPTOS_NO_PULL, EULEPTOS_YES
+USAGE
             exit 0 ;;
     esac
 done
