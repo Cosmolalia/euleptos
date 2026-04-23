@@ -2,7 +2,7 @@
 
 **The well-grasped instance.** A local-first wrapper around your existing Claude Code install. Rolling context, persistent artifacts, baked-in geometric cognition primer.
 
-> **Already have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed? You're done.** Euleptos drives `claude -p` directly — no API key, no extra auth, no configuration. Whatever login you've already set up for Claude Code is the auth for the harness. If Claude Code isn't installed yet, you get a one-line pointer. Ollama for local models is auto-detected and auto-installed alongside.
+> **Already have [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed? You're done.** Euleptos drives `claude -p` directly — no API key, no extra auth, no configuration. Whatever login you've already set up for Claude Code is the auth for the harness. If Claude Code isn't installed yet, you get a one-line pointer. Ollama for local models is **opt-in** — pass `--ollama` to the installer (or `$env:EULEPTOS_WITH_OLLAMA=1` on Windows) if you want it. If you already have Ollama, Euleptos detects and uses it automatically.
 
 Euleptos runs on your machine. Your conversations, artifacts, and context live in local files you own — no cloud database, no hidden telemetry. It's a FastAPI wrapper that shells out to your local `claude` CLI for each turn and adds the things Claude Code needs to feel continuous across sessions: rolling context windows, snapshot-before-edit discipline, artifact persistence, and a Klein3 reasoning primer that's been tuned across 57 trials for real-world effectiveness.
 
@@ -23,18 +23,28 @@ Euleptos runs on your machine. Your conversations, artifacts, and context live i
 
 ## Install
 
-Requires **Python 3.10+**. The primary path uses your existing [Claude Code](https://docs.anthropic.com/en/docs/claude-code) install — **no API key needed.** Ollama support for local models is auto-installed alongside. An Anthropic API key is only needed if you want *Pure Mode* (raw API bypass); most users never set one.
+Requires **Python 3.10+**. The primary path uses your existing [Claude Code](https://docs.anthropic.com/en/docs/claude-code) install — **no API key needed.** Ollama is opt-in: pass `--ollama` to the installer if you want local models too. An Anthropic API key is only needed if you want *Pure Mode* (raw API bypass); most users never set one.
 
 ### One-line install (recommended)
 
-**Mac / Linux:**
+**Mac / Linux (minimal — Claude Code only):**
 ```bash
 curl -fsSL https://euleptos.com/install.sh | bash
 ```
 
-**Windows (PowerShell):**
+**Mac / Linux (with Ollama + baseline model):**
+```bash
+curl -fsSL https://euleptos.com/install.sh | bash -s -- --ollama
+```
+
+**Windows (minimal):**
 ```powershell
 irm https://euleptos.com/install.ps1 | iex
+```
+
+**Windows (with Ollama):**
+```powershell
+$env:EULEPTOS_WITH_OLLAMA=1; irm https://euleptos.com/install.ps1 | iex
 ```
 
 The installer:
@@ -42,8 +52,7 @@ The installer:
 - Downloads + extracts Euleptos to `~/euleptos`
 - Installs the small set of pip dependencies
 - **Detects Claude Code** — if `claude` is on your PATH, Euleptos will drive it directly. No API key, no extra auth. If it's missing, prints a one-line pointer to Anthropic's installer.
-- Detects [Ollama](https://ollama.com) and auto-installs it if missing (with consent)
-- Pulls `llama3.2:3b` (~2 GB) so you have a working local model out of the box
+- **Ollama (opt-in)** — if already installed, Euleptos uses it. With `--ollama` / `EULEPTOS_WITH_OLLAMA=1`, it runs the official [Ollama](https://ollama.com) installer and pulls `llama3.2:3b` (~2 GB) as a baseline. Without the flag, it leaves Ollama alone.
 - Creates `.env` with a placeholder for your Anthropic key (optional — only for Pure Mode / raw API bypass)
 
 Then:
